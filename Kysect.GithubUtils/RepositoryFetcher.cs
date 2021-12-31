@@ -47,6 +47,20 @@ public class RepositoryFetcher
         Commands.Fetch(repo, remote.Name, refSpecs, fetchOptions, string.Empty);
     }
 
+    public void Checkout(string username, string repository, string branch)
+    {
+        EnsureRepositoryUpdated(username, repository);
+        
+        string targetPath = _pathFormatter.FormatFolderPath(username, repository);
+        using var repo = new Repository(targetPath);
+        Branch repoBranch = repo.Branches[branch];
+        if (repoBranch is null)
+        {
+            repoBranch = repo.Branches[$"origin/{branch}"];
+        }
+        Commands.Checkout(repo, repoBranch);
+    }
+
     private UsernamePasswordCredentials CreateCredentialsProvider(string url, string usernameFromUrl, SupportedCredentialTypes types)
     {
         return new UsernamePasswordCredentials { Username = _gitUser, Password = _token };
