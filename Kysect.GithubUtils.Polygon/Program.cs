@@ -1,4 +1,10 @@
-using Kysect.GithubUtils;
+﻿using Kysect.GithubUtils;
+using Serilog;
+
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Debug()
+    .WriteTo.Console()
+    .CreateLogger();
 
 var gitUser = string.Empty;
 var token = string.Empty;
