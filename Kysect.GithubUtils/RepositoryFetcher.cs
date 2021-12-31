@@ -30,9 +30,6 @@ public class RepositoryFetcher
 
         using var repo = new Repository(targetPath);
 
-        //TODO: research pull options
-        //TODO: Probably we do not need to pull and merge. We need to fail and throw error if version tree was modified
-        var signature = new Signature("Kysect", "Kysect@kysect.dev", DateTimeOffset.Now);
-        Commands.Pull(repo, signature, null);
+        Commands.Fetch(repo, remoteUrl, repo.Branches.Where(b => b.IsRemote).Select(b => b.RemoteName), new FetchOptions(), string.Empty);
     }
 }
