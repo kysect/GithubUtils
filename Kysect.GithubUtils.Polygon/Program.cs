@@ -1,7 +1,9 @@
 ﻿using Kysect.GithubUtils;
 
-var repositoryFetcher = new RepositoryFetcher(new FakeFormatter());
-repositoryFetcher.EnsureRepositoryUpdated("fredikats", "fredikats");
+var gitUser = string.Empty;
+var token = string.Empty;
+var repositoryFetcher = new RepositoryFetcher(new FakeFormatter(), gitUser, token);
+repositoryFetcher.EnsureRepositoryUpdated("fredikats", "test");
 
 public class FakeFormatter : IPathFormatter
 {
