@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Kysect.GithubUtils.csproj.DotSettings" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="LibGit2Sharp" Version="0.26.2" />
   </ItemGroup>
 
