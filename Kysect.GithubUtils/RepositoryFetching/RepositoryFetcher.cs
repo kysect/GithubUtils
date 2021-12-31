@@ -3,11 +3,6 @@ using Serilog;
 
 namespace Kysect.GithubUtils;
 
-public interface IPathFormatter
-{
-    string FormatFolderPath(string username, string repository);
-}
-
 public class RepositoryFetcher
 {
     private readonly IPathFormatter _pathFormatter;
@@ -25,7 +20,7 @@ public class RepositoryFetcher
         _token = token;
     }
 
-    public void EnsureRepositoryUpdated(string username, string repository)
+    public string EnsureRepositoryUpdated(string username, string repository)
     {
         ArgumentNullException.ThrowIfNull(username);
         ArgumentNullException.ThrowIfNull(repository);
@@ -39,7 +34,7 @@ public class RepositoryFetcher
             Directory.CreateDirectory(targetPath);
             var cloneOptions = new CloneOptions { CredentialsProvider = CreateCredentialsProvider };
             Repository.Clone(remoteUrl, targetPath, cloneOptions);
-            return;
+            return targetPath;
         }
 
         Log.Information($"Try to fetch updates from remote repository. Repository: {username}/{repository}, folder: {targetPath}");
@@ -49,9 +44,10 @@ public class RepositoryFetcher
         List<string> refSpecs = remote.FetchRefSpecs.Select(x => x.Specification).ToList();
         Log.Debug("Refs for update: " + string.Join(", ", refSpecs));
         Commands.Fetch(repo, remote.Name, refSpecs, fetchOptions, string.Empty);
+        return targetPath;
     }
 
-    public void Checkout(string username, string repository, string branch)
+    public string Checkout(string username, string repository, string branch)
     {
         Log.Information($"Checkout branch. Repository: {username}/{repository}, branch: {branch}");
         EnsureRepositoryUpdated(username, repository);
@@ -69,6 +65,7 @@ public class RepositoryFetcher
             throw new ArgumentException($"Specified branch was not found: {repoBranch}");
 
         Commands.Checkout(repo, repoBranch);
+        return targetPath;
     }
 
     private UsernamePasswordCredentials CreateCredentialsProvider(string url, string usernameFromUrl, SupportedCredentialTypes types)
