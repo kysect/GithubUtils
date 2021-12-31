@@ -4,6 +4,11 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <RepositoryUrl>https://github.com/kysect/GithubUtils</RepositoryUrl>
+    <Company>Kysect</Company>
+    <Authors>Kysect</Authors>
+    <Version>1.0.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
