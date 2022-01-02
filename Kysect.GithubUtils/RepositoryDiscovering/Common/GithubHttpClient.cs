@@ -42,7 +42,7 @@ public class GithubHttpClient : IDisposable
     internal async Task<GitHubRepository[]> GetOnePageOfRepositories(
         string organization,
         int currentPage,
-        GitHubRepositoryType repositoryTypeFilter = GitHubRepositoryType.Private)
+        GitHubRepositoryType repositoryTypeFilter = GitHubRepositoryType.All)
     {
         string endpoint = BuildRepositoryListingEndpoint(organization, currentPage, repositoryTypeFilter);
         HttpResponseMessage responseMessage;
@@ -68,7 +68,7 @@ public class GithubHttpClient : IDisposable
 
     private static string BuildRepositoryListingEndpoint(string organization,
         int page = 1,
-        GitHubRepositoryType repositoryTypeFilter = GitHubRepositoryType.Private)
+        GitHubRepositoryType repositoryTypeFilter = GitHubRepositoryType.All)
     {
         if (string.IsNullOrEmpty(organization))
             throw new RepositoryDiscoveryConfigurationException("GitHub Organization was not specified",

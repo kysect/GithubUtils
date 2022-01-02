@@ -4,8 +4,6 @@ namespace Kysect.GithubUtils.RepositoryDiscovering;
 
 public sealed class GitHubRepositoryDiscoveryService : IRepositoryDiscoveryService
 {
-    private const string GitHubApiBaseUrl = "https://api.github.com";
-    private const string GitHubAcceptJsonHeaderValue = "application/vnd.github.v3+json";
     private const int PageSize = 100;
 
     private readonly string _token;
@@ -21,6 +19,7 @@ public sealed class GitHubRepositoryDiscoveryService : IRepositoryDiscoveryServi
 
     public async IAsyncEnumerable<RepositoryRecord> TryDiscover(
         string organization,
+        GitHubRepositoryType repositoryTypeFilter = GitHubRepositoryType.All,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(organization))
@@ -35,7 +34,7 @@ public sealed class GitHubRepositoryDiscoveryService : IRepositoryDiscoveryServi
             if (cancellationToken.IsCancellationRequested)
                 yield break;
 
-            var page = await client.GetOnePageOfRepositories(organization, currentPage++);
+            var page = await client.GetOnePageOfRepositories(organization, currentPage++, repositoryTypeFilter);
             previousPageLength = page.Length;
             foreach (var repo in page)
             {

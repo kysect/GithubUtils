@@ -2,5 +2,8 @@
 
 public interface IRepositoryDiscoveryService
 {
-    IAsyncEnumerable<RepositoryRecord> TryDiscover(string organization, CancellationToken cancellationToken = default);
+    IAsyncEnumerable<RepositoryRecord> TryDiscover(
+        string organization,
+        GitHubRepositoryType repositoryTypeFilter = GitHubRepositoryType.All,
+        CancellationToken cancellationToken = default);
 }
