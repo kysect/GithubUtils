@@ -30,26 +30,25 @@ public class RepositoryFetcher
 
         if (!Directory.Exists(targetPath))
         {
-            Log.Information($"Create directory for cloning repo. Repository: {username}/{repository}, folder: {targetPath}");
+            Log.Debug($"Create directory for cloning repo. Repository: {username}/{repository}, folder: {targetPath}");
             Directory.CreateDirectory(targetPath);
             var cloneOptions = new CloneOptions { CredentialsProvider = CreateCredentialsProvider };
             Repository.Clone(remoteUrl, targetPath, cloneOptions);
             return targetPath;
         }
 
-        Log.Information($"Try to fetch updates from remote repository. Repository: {username}/{repository}, folder: {targetPath}");
+        Log.Debug($"Try to fetch updates from remote repository. Repository: {username}/{repository}, folder: {targetPath}");
         using var repo = new Repository(targetPath);
         var fetchOptions = new FetchOptions { CredentialsProvider = CreateCredentialsProvider };
         Remote remote = repo.Network.Remotes["origin"];
         List<string> refSpecs = remote.FetchRefSpecs.Select(x => x.Specification).ToList();
-        Log.Debug("Refs for update: " + string.Join(", ", refSpecs));
         Commands.Fetch(repo, remote.Name, refSpecs, fetchOptions, string.Empty);
         return targetPath;
     }
 
     public string Checkout(string username, string repository, string branch)
     {
-        Log.Information($"Checkout branch. Repository: {username}/{repository}, branch: {branch}");
+        Log.Debug($"Checkout branch. Repository: {username}/{repository}, branch: {branch}");
         EnsureRepositoryUpdated(username, repository);
         
         string targetPath = _pathFormatter.FormatFolderPath(username, repository);
@@ -57,7 +56,6 @@ public class RepositoryFetcher
         Branch repoBranch = repo.Branches[branch];
         if (repoBranch is null)
         {
-            Log.Information("Branch was not found will try with prefix origin");
             repoBranch = repo.Branches[$"origin/{branch}"];
         }
 
