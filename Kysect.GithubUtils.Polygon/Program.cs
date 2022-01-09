@@ -8,15 +8,7 @@ Log.Logger = new LoggerConfiguration()
 
 var gitUser = string.Empty;
 var token = string.Empty;
-var repositoryFetcher = new RepositoryFetcher(new FakeFormatter(), gitUser, token);
+var repositoryFetcher = new RepositoryFetcher(new FullPathFormatter("repo"), gitUser, token);
 repositoryFetcher.EnsureRepositoryUpdated("fredikats", "test");
 repositoryFetcher.Checkout("fredikats", "test", "main");
 repositoryFetcher.Checkout("fredikats", "test", "qq");
-
-public class FakeFormatter : IPathFormatter
-{
-    public string FormatFolderPath(string username, string repository)
-    {
-        return Path.Combine("repo", username, repository);
-    }
-}
