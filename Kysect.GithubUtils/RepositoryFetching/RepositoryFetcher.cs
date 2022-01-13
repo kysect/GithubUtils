@@ -1,4 +1,4 @@
-using LibGit2Sharp;
+﻿using LibGit2Sharp;
 using Serilog;
 
 namespace Kysect.GithubUtils;
@@ -59,7 +59,12 @@ public class RepositoryFetcher
         }
 
         if (repoBranch is null)
-            throw new ArgumentException($"Specified branch was not found: {repoBranch}");
+        {
+            var message = $"Specified branch was not found. Repository: {repository}, branch: {branch}";
+            Log.Error(message);
+            Log.Information("Available branches: " + string.Join(", ", repo.Branches.Select(b => b.FriendlyName)));
+            throw new ArgumentException(message);
+        }
 
         Commands.Checkout(repo, repoBranch);
         return targetPath;
