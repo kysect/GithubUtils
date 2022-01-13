@@ -8,12 +8,14 @@ public class OrganizationFetcher
     private readonly bool _useParallelProcessing = true;
 
     private readonly RepositoryFetcher _repositoryFetcher;
+    private readonly bool _ignoreMissedBranch;
     private readonly IRepositoryDiscoveryService _discoveryService;
 
-    public OrganizationFetcher(IRepositoryDiscoveryService discoveryService, RepositoryFetcher repositoryFetcher)
+    public OrganizationFetcher(IRepositoryDiscoveryService discoveryService, RepositoryFetcher repositoryFetcher, bool ignoreMissedBranch = false)
     {
         _discoveryService = discoveryService;
         _repositoryFetcher = repositoryFetcher;
+        _ignoreMissedBranch = ignoreMissedBranch;
     }
 
     public IReadOnlyCollection<GithubOrganizationRepository> Fetch(string organizationName, string? branch = null)
@@ -45,11 +47,11 @@ public class OrganizationFetcher
         }
     }
 
-    private GithubOrganizationRepository SyncRepository(RepositoryRecord repository, string organizationName, string? branch = null)
+    private GithubOrganizationRepository SyncRepository(RepositoryRecord repository, string organizationName, string? branch)
     {
         string path = _repositoryFetcher.EnsureRepositoryUpdated(organizationName, repository.Name);
         if (branch is not null)
-            _repositoryFetcher.Checkout(organizationName, repository.Name, branch);
+            _repositoryFetcher.Checkout(organizationName, repository.Name, branch, _ignoreMissedBranch);
 
         return new GithubOrganizationRepository(path, organizationName, repository.Name);
     }
