@@ -1,4 +1,4 @@
-﻿using LibGit2Sharp;
+using LibGit2Sharp;
 using Serilog;
 
 namespace Kysect.GithubUtils;
@@ -49,7 +49,6 @@ public class RepositoryFetcher
     public string Checkout(string username, string repository, string branch)
     {
         Log.Debug($"Checkout branch. Repository: {username}/{repository}, branch: {branch}");
-        EnsureRepositoryUpdated(username, repository);
         
         string targetPath = _pathFormatter.FormatFolderPath(username, repository);
         using var repo = new Repository(targetPath);
