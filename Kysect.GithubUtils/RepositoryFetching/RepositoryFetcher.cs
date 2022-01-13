@@ -46,10 +46,9 @@ public class RepositoryFetcher
         return targetPath;
     }
 
-    public string Checkout(string username, string repository, string branch)
+    public string Checkout(string username, string repository, string branch, bool ignoreMissedBranch = false)
     {
         Log.Debug($"Checkout branch. Repository: {username}/{repository}, branch: {branch}");
-        EnsureRepositoryUpdated(username, repository);
         
         string targetPath = _pathFormatter.FormatFolderPath(username, repository);
         using var repo = new Repository(targetPath);
@@ -60,7 +59,15 @@ public class RepositoryFetcher
         }
 
         if (repoBranch is null)
-            throw new ArgumentException($"Specified branch was not found: {repoBranch}");
+        {
+            var message = $"Specified branch was not found. Repository: {repository}, branch: {branch}";
+            Log.Error(message);
+            Log.Information("Available branches: " + string.Join(", ", repo.Branches.Select(b => b.FriendlyName)));
+
+            if (!ignoreMissedBranch)
+                throw new ArgumentException(message);
+            return targetPath;
+        }
 
         Commands.Checkout(repo, repoBranch);
         return targetPath;
