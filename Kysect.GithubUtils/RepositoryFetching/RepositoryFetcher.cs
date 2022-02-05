@@ -1,5 +1,6 @@
 ﻿using LibGit2Sharp;
 using Serilog;
+using Microsoft.Extensions.Configuration;
 
 namespace Kysect.GithubUtils;
 
@@ -18,6 +19,17 @@ public class RepositoryFetcher
         _pathFormatter = pathFormatter;
         _gitUser = gitUser;
         _token = token;
+    }
+
+    public RepositoryFetcher(IPathFormatter pathFormatter, IConfiguration config)
+    {
+        var gitConfig = config.GetSection("GitHub"); 
+        _gitUser = gitConfig.GetSection("User").Value 
+                   ?? throw new ArgumentException("GitHub User not found in config");
+        _token = gitConfig.GetSection("Token").Value 
+                 ?? throw new ArgumentException("GitHub Token not found in config");
+        _pathFormatter = pathFormatter;
+        
     }
 
     public string EnsureRepositoryUpdated(string username, string repository)
