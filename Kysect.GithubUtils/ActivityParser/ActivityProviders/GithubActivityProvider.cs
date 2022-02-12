@@ -1,38 +1,53 @@
 ﻿using System.Diagnostics;
 using System.Text.Json;
+using Serilog;
 
 namespace Kysect.GithubUtils
 {
-    public class GithubActivityProvider
+    public class GithubActivityProvider : IGithubActivityProvider
     {
         private const string Url = "https://github-contributions.now.sh/api/v1/";
 
         private readonly HttpClient _client;
+        private readonly bool _isParallel;
+        private readonly bool _withRetry;
 
-        public GithubActivityProvider()
+        public GithubActivityProvider(bool isParallel = true, bool withRetry = false)
         {
+            _isParallel = isParallel;
+            _withRetry = withRetry;
             _client = new HttpClient();
         }
 
-        public async Task<ActivityInfo> GetActivityInfo(string username, DateTime? from = null, DateTime? to = null)
+        public Dictionary<string, ActivityInfo> GetActivityInfo(IReadOnlyCollection<string> usernames, DateTime? from = null, DateTime? to = null)
         {
-            string response = await _client.GetStringAsync(Url + username);
-            var activityInfo = JsonSerializer.Deserialize<ActivityInfo>(response, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            Log.Information($"Start getting activity for users. Users count: {usernames.Count}, Parallel: {_isParallel}, With retry: {_withRetry}");
 
-            return activityInfo.FilterValues(from, to);
-        }
-
-        public Dictionary<string, ActivityInfo> GetActivityInfo(IReadOnlyCollection<string> usernames, bool isParallel, DateTime? from = null, DateTime? to = null)
-        {
-            if (!isParallel)
+            if (_isParallel)
             {
+                if (_withRetry)
+                    return GetInfoWithRetry(usernames, from, to);
+
+                //TODO: make async
                 return usernames
-                    .ToDictionary(username => username, username => GetActivityInfo(username, @from, to).Result);
+                    .AsParallel()
+                    .ToDictionary(username => username, username => GetActivityInfo(username, from, to).Result);
             }
 
             return usernames
-                .AsParallel()
-                .ToDictionary(username => username, username => GetActivityInfo(username, @from, to).Result);
+                .ToDictionary(username => username, username => GetActivityInfo(username, from, to).Result);
+
+        }
+
+        private async Task<ActivityInfo> GetActivityInfo(string username, DateTime? from = null, DateTime? to = null)
+        {
+            Log.Debug($"Request activity for {username}, from: {from?.ToShortDateString()}, to {to?.ToShortDateString()}");
+
+            string response = await _client.GetStringAsync(Url + username);
+            var activityInfo = JsonSerializer.Deserialize<ActivityInfo>(response, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            //TODO: fix nullability
+            return activityInfo.FilterValues(from, to);
         }
 
         /// <summary>
@@ -42,25 +57,25 @@ namespace Kysect.GithubUtils
         /// <param name="from"></param>
         /// <param name="to"></param>
         /// <returns></returns>
-        public Dictionary<string, ActivityInfo> GetInfoWithRetry(IReadOnlyCollection<string> usernames, DateTime? from = null, DateTime? to = null)
+        private Dictionary<string, ActivityInfo> GetInfoWithRetry(IReadOnlyCollection<string> usernames, DateTime? from = null, DateTime? to = null)
         {
             int tryCount = 5;
 
             Dictionary<string, ActivityInfo> result = new Dictionary<string, ActivityInfo>();
 
-            Debug.Print($"Start processing: {usernames.Count}");
             for (int i = 0; i < tryCount && result.Count != usernames.Count; i++)
             {
                 if (i != 0)
                 {
-                    Debug.Print($"Elements for processing left: {usernames.Count - result.Count}");
+                    Debug.Print($"Elements for getting activity in queue left: {usernames.Count - result.Count}");
                     Thread.Sleep(2000);
                 }
 
+                //FYI: it is some kind of hack. Sometimes we get zero values
                 List<(string Username, ActivityInfo Result)> localResult = usernames
                     .Where(u => !result.ContainsKey(u))
                     .AsParallel()
-                    .Select(username => (username, GetActivityInfo(username, @from, to).Result))
+                    .Select(username => (username, GetActivityInfo(username, from, to).Result))
                     .Where(r => r.Result.Total > 0)
                     .ToList();
 
