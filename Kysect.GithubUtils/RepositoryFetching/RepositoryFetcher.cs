@@ -25,6 +25,19 @@ public class RepositoryFetcher
         ArgumentNullException.ThrowIfNull(username);
         ArgumentNullException.ThrowIfNull(repository);
 
+        try
+        {
+            return EnsureRepositoryUpdatedInternal(username, repository);
+        }
+        catch (Exception e)
+        {
+            var message = $"Exception while updating repo: {username}/{repository}";
+            throw new AggregateException(message, e);
+        }
+    }
+
+    private string EnsureRepositoryUpdatedInternal(string username, string repository)
+    {
         string remoteUrl = GetRemoteUrl(username, repository);
         string targetPath = _pathFormatter.FormatFolderPath(username, repository);
 
@@ -44,6 +57,7 @@ public class RepositoryFetcher
         List<string> refSpecs = remote.FetchRefSpecs.Select(x => x.Specification).ToList();
         Commands.Fetch(repo, remote.Name, refSpecs, fetchOptions, string.Empty);
         return targetPath;
+
     }
 
     public string Checkout(string username, string repository, string branch, bool ignoreMissedBranch = false)
@@ -51,26 +65,34 @@ public class RepositoryFetcher
         Log.Debug($"Checkout branch. Repository: {username}/{repository}, branch: {branch}");
         
         string targetPath = _pathFormatter.FormatFolderPath(username, repository);
-        using var repo = new Repository(targetPath);
-        Branch repoBranch = repo.Branches[branch];
-        if (repoBranch is null)
+        try
         {
-            repoBranch = repo.Branches[$"origin/{branch}"];
-        }
+            using var repo = new Repository(targetPath);
+            Branch repoBranch = repo.Branches[branch];
+            if (repoBranch is null)
+            {
+                repoBranch = repo.Branches[$"origin/{branch}"];
+            }
 
-        if (repoBranch is null)
-        {
-            var message = $"Specified branch was not found. Repository: {repository}, branch: {branch}";
-            Log.Error(message);
-            Log.Information("Available branches: " + string.Join(", ", repo.Branches.Select(b => b.FriendlyName)));
+            if (repoBranch is null)
+            {
+                var message = $"Specified branch was not found. Repository: {repository}, branch: {branch}";
+                Log.Error(message);
+                Log.Information("Available branches: " + string.Join(", ", repo.Branches.Select(b => b.FriendlyName)));
 
-            if (!ignoreMissedBranch)
-                throw new ArgumentException(message);
+                if (!ignoreMissedBranch)
+                    throw new ArgumentException(message);
+                return targetPath;
+            }
+
+            Commands.Checkout(repo, repoBranch);
             return targetPath;
         }
-
-        Commands.Checkout(repo, repoBranch);
-        return targetPath;
+        catch (Exception e)
+        {
+            var message = $"Exception while checkout repo: {username}/{repository}, branch: {branch}";
+            throw new AggregateException(message, e);
+        }
     }
 
     private UsernamePasswordCredentials CreateCredentialsProvider(string url, string usernameFromUrl, SupportedCredentialTypes types)

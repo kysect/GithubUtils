@@ -5,17 +5,18 @@ namespace Kysect.GithubUtils.OrganizationFetching;
 
 public class OrganizationFetcher
 {
-    private readonly bool _useParallelProcessing = true;
+    private readonly bool _useParallelProcessing;
 
     private readonly RepositoryFetcher _repositoryFetcher;
     private readonly bool _ignoreMissedBranch;
     private readonly IRepositoryDiscoveryService _discoveryService;
 
-    public OrganizationFetcher(IRepositoryDiscoveryService discoveryService, RepositoryFetcher repositoryFetcher, bool ignoreMissedBranch = false)
+    public OrganizationFetcher(IRepositoryDiscoveryService discoveryService, RepositoryFetcher repositoryFetcher, bool ignoreMissedBranch = false, bool useParallelProcessing = true)
     {
         _discoveryService = discoveryService;
         _repositoryFetcher = repositoryFetcher;
         _ignoreMissedBranch = ignoreMissedBranch;
+        _useParallelProcessing = useParallelProcessing;
     }
 
     public IReadOnlyCollection<GithubOrganizationRepository> Fetch(string organizationName, string? branch = null)
