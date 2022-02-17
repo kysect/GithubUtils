@@ -32,7 +32,7 @@ public class RepositoryFetcher
         catch (Exception e)
         {
             var message = $"Exception while updating repo: {username}/{repository}";
-            throw new AggregateException(message, e);
+            throw new GithubUtilsException(message, e);
         }
     }
 
@@ -91,7 +91,7 @@ public class RepositoryFetcher
         catch (Exception e)
         {
             var message = $"Exception while checkout repo: {username}/{repository}, branch: {branch}";
-            throw new AggregateException(message, e);
+            throw new GithubUtilsException(message, e);
         }
     }
 
