@@ -8,16 +8,19 @@ public class RepositoryFetcher
     private readonly IPathFormatter _pathFormatter;
     private readonly string _gitUser;
     private readonly string _token;
+    private readonly RepositoryFetchOptions _fetchOptions;
 
-    public RepositoryFetcher(IPathFormatter pathFormatter, string gitUser, string token)
+    public RepositoryFetcher(IPathFormatter pathFormatter, string gitUser, string token, RepositoryFetchOptions fetchOptions)
     {
         ArgumentNullException.ThrowIfNull(pathFormatter);
         ArgumentNullException.ThrowIfNull(gitUser);
         ArgumentNullException.ThrowIfNull(token);
+        ArgumentNullException.ThrowIfNull(fetchOptions);
 
         _pathFormatter = pathFormatter;
         _gitUser = gitUser;
         _token = token;
+        _fetchOptions = fetchOptions;
     }
 
     public string EnsureRepositoryUpdated(string username, string repository)
@@ -60,7 +63,7 @@ public class RepositoryFetcher
 
     }
 
-    public string Checkout(string username, string repository, string branch, bool ignoreMissedBranch = false)
+    public string Checkout(string username, string repository, string branch)
     {
         Log.Debug($"Checkout branch. Repository: {username}/{repository}, branch: {branch}");
         
@@ -80,12 +83,15 @@ public class RepositoryFetcher
                 Log.Error(message);
                 Log.Information("Available branches: " + string.Join(", ", repo.Branches.Select(b => b.FriendlyName)));
 
-                if (!ignoreMissedBranch)
+                if (!_fetchOptions.IgnoreMissedBranch)
                     throw new ArgumentException(message);
+                else
+                    Log.Debug($"Skip checkout to branch {branch}. No such branch in {username}/{repository}.");
+                
                 return targetPath;
             }
 
-            Commands.Checkout(repo, repoBranch);
+            Commands.Checkout(repo, repoBranch, _fetchOptions.CheckoutOptions);
             return targetPath;
         }
         catch (Exception e)

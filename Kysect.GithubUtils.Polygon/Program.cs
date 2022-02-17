@@ -14,7 +14,7 @@ void CheckFetcher()
 {
     var gitUser = string.Empty;
     var token = string.Empty;
-    var repositoryFetcher = new RepositoryFetcher(new FullPathFormatter("repo"), gitUser, token);
+    var repositoryFetcher = new RepositoryFetcher(new FullPathFormatter("repo"), gitUser, token, new RepositoryFetchOptions());
     repositoryFetcher.EnsureRepositoryUpdated("fredikats", "test");
     repositoryFetcher.Checkout("fredikats", "test", "main");
     repositoryFetcher.Checkout("fredikats", "test", "qq");
