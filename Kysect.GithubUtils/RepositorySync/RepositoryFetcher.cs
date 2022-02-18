@@ -5,12 +5,12 @@ namespace Kysect.GithubUtils;
 
 public class RepositoryFetcher
 {
-    private readonly IPathFormatter _pathFormatter;
+    private readonly IPathToRepositoryFormatter _pathFormatter;
     private readonly string _gitUser;
     private readonly string _token;
     private readonly RepositoryFetchOptions _fetchOptions;
 
-    public RepositoryFetcher(IPathFormatter pathFormatter, string gitUser, string token, RepositoryFetchOptions fetchOptions)
+    public RepositoryFetcher(IPathToRepositoryFormatter pathFormatter, string gitUser, string token, RepositoryFetchOptions fetchOptions)
     {
         ArgumentNullException.ThrowIfNull(pathFormatter);
         ArgumentNullException.ThrowIfNull(gitUser);

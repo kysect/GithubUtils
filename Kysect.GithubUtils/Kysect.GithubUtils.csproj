@@ -22,7 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="OrganizationFetching\" />
+    <Folder Include="RepositorySync\PathToRepositoryFormatters\" />
   </ItemGroup>
 
 </Project>
