@@ -1,4 +1,4 @@
-﻿namespace Kysect.GithubUtils;
+﻿namespace Kysect.GithubUtils.RepositorySync;
 
 public class FullPathFormatter : IPathToRepositoryFormatter
 {
