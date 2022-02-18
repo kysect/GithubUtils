@@ -1,6 +1,8 @@
-﻿namespace Kysect.GithubUtils.RepositorySync;
+﻿using Kysect.GithubUtils.Models;
+
+namespace Kysect.GithubUtils.RepositorySync;
 
 public interface IPathToRepositoryFormatter
 {
-    string FormatFolderPath(string username, string repository);
+    string FormatFolderPath(GithubRepository githubRepository);
 }
