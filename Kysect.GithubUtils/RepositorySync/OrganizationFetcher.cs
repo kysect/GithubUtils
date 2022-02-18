@@ -1,7 +1,7 @@
 ﻿using Kysect.GithubUtils.RepositoryDiscovering;
 using Serilog;
 
-namespace Kysect.GithubUtils.OrganizationFetching;
+namespace Kysect.GithubUtils.RepositorySync;
 
 public class OrganizationFetcher
 {

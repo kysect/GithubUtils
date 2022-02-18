@@ -1,7 +1,7 @@
 ﻿using LibGit2Sharp;
 using Serilog;
 
-namespace Kysect.GithubUtils;
+namespace Kysect.GithubUtils.RepositorySync;
 
 public class RepositoryFetcher
 {
