@@ -11,6 +11,7 @@ namespace Kysect.GithubUtils.Tests;
 
 //to pass tests you should specify some information in appsettings.json
 
+[Ignore("Only manual run")]
 public class RepositoryDiscoveryIntegrationTests
 {
     private IRepositoryDiscoveryService _discoveryService;
@@ -94,6 +95,7 @@ public class RepositoryDiscoveryIntegrationTests
         Assert.IsTrue(exception.Message.Contains("organization was not found"),
             "Not excepted exception was handled");
     }
+
     public async Task ShouldBeAbleToGetOrganisationRepositories()
     {
         string expectedRepoName = _configuration.GetSection("ExpectedRepoName").Value;
