@@ -2,21 +2,20 @@
 
 public class OrganizationReplicationHub
 {
-    private readonly string _rootDirectory;
+    private readonly IOrganizationReplicatorPathProvider _pathProvider;
 
-    public OrganizationReplicationHub(string rootDirectory)
+    public OrganizationReplicationHub(IOrganizationReplicatorPathProvider pathProvider)
     {
-        ArgumentNullException.ThrowIfNull(rootDirectory);
+        ArgumentNullException.ThrowIfNull(pathProvider);
 
-        _rootDirectory = rootDirectory;
-        Directory.CreateDirectory(rootDirectory);
+        _pathProvider = pathProvider;
     }
 
     public bool TryAddOrganization(string organization)
     {
         ArgumentNullException.ThrowIfNull(organization);
 
-        string organizationDirectoryPath = Path.Combine(_rootDirectory, organization);
+        string organizationDirectoryPath = _pathProvider.GetPathToOrganization(organization);
         if (Directory.Exists(organizationDirectoryPath))
             return false;
 
@@ -26,6 +25,8 @@ public class OrganizationReplicationHub
 
     public IReadOnlyCollection<string> GetOrganizationNames()
     {
-        return Directory.EnumerateDirectories(_rootDirectory).ToList();
+        string pathToOrganizations = _pathProvider.GetPathToOrganizations();
+        Directory.CreateDirectory(pathToOrganizations);
+        return Directory.EnumerateDirectories(pathToOrganizations).ToList();
     }
 }
