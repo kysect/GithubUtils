@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using Kysect.GithubUtils;
+using Kysect.GithubUtils.RepositorySync;
 using Serilog;
 
 Log.Logger = new LoggerConfiguration()
@@ -7,7 +8,7 @@ Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
     .CreateLogger();
 
-//CheckFetcher();
+CheckFetcher();
 CheckStatParser();
 
 void CheckFetcher()
