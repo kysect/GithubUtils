@@ -1,4 +1,6 @@
-﻿namespace Kysect.GithubUtils.RepositorySync;
+﻿using Kysect.GithubUtils.Models;
+
+namespace Kysect.GithubUtils.RepositorySync;
 
 public class RepositoryNameFolderFormatter : IPathToRepositoryFormatter
 {
@@ -9,8 +11,8 @@ public class RepositoryNameFolderFormatter : IPathToRepositoryFormatter
         _rootPath = rootPath;
     }
 
-    public string FormatFolderPath(string username, string repository)
+    public string FormatFolderPath(GithubRepository githubRepository)
     {
-        return Path.Combine(_rootPath, repository);
+        return Path.Combine(_rootPath, githubRepository.Name);
     }
 }

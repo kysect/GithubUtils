@@ -1,4 +1,5 @@
-﻿using Kysect.GithubUtils.RepositoryDiscovering;
+﻿using Kysect.GithubUtils.Models;
+using Kysect.GithubUtils.RepositoryDiscovering;
 using Serilog;
 
 namespace Kysect.GithubUtils.RepositorySync;
@@ -48,9 +49,9 @@ public class OrganizationFetcher
 
     private GithubOrganizationRepository SyncRepository(RepositoryRecord repository, string organizationName, string? branch)
     {
-        string path = _repositoryFetcher.EnsureRepositoryUpdated(organizationName, repository.Name);
+        string path = _repositoryFetcher.EnsureRepositoryUpdated(new GithubRepository(organizationName, repository.Name));
         if (branch is not null)
-            _repositoryFetcher.Checkout(organizationName, repository.Name, branch);
+            _repositoryFetcher.Checkout(new GithubRepository(organizationName, repository.Name), branch);
 
         return new GithubOrganizationRepository(path, organizationName, repository.Name);
     }
