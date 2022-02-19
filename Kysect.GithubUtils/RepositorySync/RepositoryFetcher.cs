@@ -51,15 +51,14 @@ public class RepositoryFetcher
         }
     }
 
-    public string Checkout(IPathToRepositoryProvider pathProvider, GithubRepository githubRepository, string branch)
+    public string Checkout(IPathToRepositoryProvider pathProvider, GithubRepositoryBranch repositoryBranch)
     {
         ArgumentNullException.ThrowIfNull(pathProvider);
-        ArgumentNullException.ThrowIfNull(branch);
 
-        Log.Debug($"Checkout branch. Repository: {githubRepository}, branch: {branch}");
-        string targetPath = pathProvider.GetPathToRepositoryWithBranch(githubRepository, branch);
-        Log.Debug($"Branch for {githubRepository}/{branch}: {targetPath}");
-        CloneRepositoryIfNeed(targetPath, githubRepository);
+        Log.Debug($"Checkout branch: {repositoryBranch}");
+        string targetPath = pathProvider.GetPathToRepositoryWithBranch(repositoryBranch);
+        Log.Debug($"Branch for {repositoryBranch}: {targetPath}");
+        CloneRepositoryIfNeed(targetPath, repositoryBranch.GetRepository());
 
         try
         {
@@ -67,29 +66,29 @@ public class RepositoryFetcher
         }
         catch (Exception e)
         {
-            var message = $"Exception while checkout repo: {githubRepository}, branch: {branch}";
+            var message = $"Exception while checkout branch {repositoryBranch}";
             throw new GithubUtilsException(message, e);
         }
 
         string CheckoutInternal()
         {
             using var repo = new Repository(targetPath);
-            Branch repoBranch = repo.Branches[branch];
+            Branch repoBranch = repo.Branches[repositoryBranch.Branch];
             if (repoBranch is null)
             {
-                repoBranch = repo.Branches[$"origin/{branch}"];
+                repoBranch = repo.Branches[$"origin/{repositoryBranch}"];
             }
 
             if (repoBranch is null)
             {
-                var message = $"Specified branch was not found. Repository: {githubRepository}, branch: {branch}";
+                var message = $"Specified branch was not found: {repositoryBranch}";
                 Log.Error(message);
                 Log.Information("Available branches: " + string.Join(", ", repo.Branches.Select(b => b.FriendlyName)));
 
                 if (!_fetchOptions.IgnoreMissedBranch)
                     throw new ArgumentException(message);
                 else
-                    Log.Debug($"Skip checkout to branch {branch}. No such branch in {githubRepository}.");
+                    Log.Debug($"Skip checkout to branch {repositoryBranch}. No such branch in repository.");
 
                 return targetPath;
             }
@@ -107,12 +106,12 @@ public class RepositoryFetcher
     {
         string masterClonePath = pathProvider.GetPathToRepository(githubRepository);
         CloneRepositoryIfNeed(masterClonePath, githubRepository);
-        using var repository = new Repository(masterClonePath);
+        using var gitRepository = new Repository(masterClonePath);
 
-        IReadOnlyCollection<string> branches = EnumerateBranches(repository);
-        foreach (string branch in branches)
+        IReadOnlyCollection<GithubRepositoryBranch> branches = EnumerateBranches(gitRepository, githubRepository);
+        foreach (GithubRepositoryBranch branch in branches)
         {
-            Checkout(pathProvider, githubRepository, branch);
+            Checkout(pathProvider, branch);
         }
     }
 
@@ -135,13 +134,14 @@ public class RepositoryFetcher
         return new UsernamePasswordCredentials { Username = _gitUser, Password = _token };
     }
 
-    private IReadOnlyCollection<string> EnumerateBranches(Repository repository)
+    private IReadOnlyCollection<GithubRepositoryBranch> EnumerateBranches(Repository gitRepository, GithubRepository githubRepository)
     {
-        return repository
+        return gitRepository
             .Branches
             .Where(b => b.FriendlyName.StartsWith("origin/"))
             .Select(b => b.FriendlyName)
             .Select(b => b.Substring("remote/".Length))
+            .Select(b => new GithubRepositoryBranch(githubRepository, b))
             .ToList();
     }
 }
