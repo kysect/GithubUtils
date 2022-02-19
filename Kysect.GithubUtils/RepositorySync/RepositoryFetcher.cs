@@ -30,7 +30,7 @@ public class RepositoryFetcher
         }
         catch (Exception e)
         {
-            var message = $"Exception while updating repo: {githubRepository}";
+            string message = $"Exception while updating repo: {githubRepository}";
             throw new GithubUtilsException(message, e);
         }
 
@@ -105,10 +105,14 @@ public class RepositoryFetcher
     public void CloneAllBranches(IOrganizationReplicatorPathProvider pathProvider, GithubRepository githubRepository)
     {
         string masterClonePath = pathProvider.GetPathToRepository(githubRepository);
+
+        Log.Debug($"Try to clone all branches from {githubRepository} to {masterClonePath}");
         CloneRepositoryIfNeed(masterClonePath, githubRepository);
         using var gitRepository = new Repository(masterClonePath);
 
         IReadOnlyCollection<GithubRepositoryBranch> branches = EnumerateBranches(gitRepository, githubRepository);
+        Log.Debug($"Discovered {branches.Count} branches for {githubRepository}");
+
         foreach (GithubRepositoryBranch branch in branches)
         {
             Checkout(pathProvider, branch);
