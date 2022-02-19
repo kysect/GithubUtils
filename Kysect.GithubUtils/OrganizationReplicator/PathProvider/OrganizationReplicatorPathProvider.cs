@@ -34,6 +34,14 @@ public class OrganizationReplicatorPathProvider : IOrganizationReplicatorPathPro
         return Path.Combine(_rootDirectory, MainDirectory, organization, repository);
     }
 
+    public string GetPathToOrganizationWithBranch(string organization, string branch)
+    {
+        ArgumentNullException.ThrowIfNull(organization);
+        ArgumentNullException.ThrowIfNull(branch);
+
+        return Path.Combine(_rootDirectory, CustomBranchDirectory, branch, organization);
+    }
+
     public string GetPathToRepositoryWithBranch(string organization, string repository, string branch)
     {
         ArgumentNullException.ThrowIfNull(organization);
