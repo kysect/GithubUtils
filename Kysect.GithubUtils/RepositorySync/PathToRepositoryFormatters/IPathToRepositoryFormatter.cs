@@ -2,7 +2,21 @@
 
 namespace Kysect.GithubUtils.RepositorySync;
 
-public interface IPathToRepositoryFormatter
+public interface IPathToRepositoryProvider
 {
-    string FormatFolderPath(GithubRepository githubRepository);
+    const string MainDirectory = "repos";
+    const string CustomBranchDirectory = "custom-branch";
+
+    string GetPathToRepository(string organization, string repository);
+    string GetPathToRepositoryWithBranch(string organization, string branch, string repository);
+}
+
+public static class PathToRepositoryProviderExtensions
+{
+    public static string GetPathToRepository(this IPathToRepositoryProvider pathProvider, GithubRepository githubRepository)
+    {
+        ArgumentNullException.ThrowIfNull(pathProvider);
+
+        return pathProvider.GetPathToRepository(githubRepository.Owner, githubRepository.Name);
+    }
 }

@@ -1,9 +1,10 @@
-﻿namespace Kysect.GithubUtils.OrganizationReplicator;
+﻿using Kysect.GithubUtils.RepositorySync;
+
+namespace Kysect.GithubUtils.OrganizationReplication;
 
 public class OrganizationReplicatorPathProvider : IOrganizationReplicatorPathProvider
 {
-    private const string MainDirectory = "organizations";
-    private const string CustomBranchDirectory = "custom-branch";
+    
 
     private readonly string _rootDirectory;
 
@@ -16,14 +17,14 @@ public class OrganizationReplicatorPathProvider : IOrganizationReplicatorPathPro
 
     public string GetPathToOrganizations()
     {
-        return Path.Combine(_rootDirectory, MainDirectory);
+        return Path.Combine(_rootDirectory, IPathToRepositoryProvider.MainDirectory);
     }
 
     public string GetPathToOrganization(string organization)
     {
         ArgumentNullException.ThrowIfNull(organization);
 
-        return Path.Combine(_rootDirectory, MainDirectory, organization);
+        return Path.Combine(_rootDirectory, IPathToRepositoryProvider.MainDirectory, organization);
     }
 
     public string GetPathToRepository(string organization, string repository)
@@ -31,7 +32,7 @@ public class OrganizationReplicatorPathProvider : IOrganizationReplicatorPathPro
         ArgumentNullException.ThrowIfNull(organization);
         ArgumentNullException.ThrowIfNull(repository);
 
-        return Path.Combine(_rootDirectory, MainDirectory, organization, repository);
+        return Path.Combine(_rootDirectory, IPathToRepositoryProvider.MainDirectory, organization, repository);
     }
 
     public string GetPathToOrganizationWithBranch(string organization, string branch)
@@ -39,7 +40,7 @@ public class OrganizationReplicatorPathProvider : IOrganizationReplicatorPathPro
         ArgumentNullException.ThrowIfNull(organization);
         ArgumentNullException.ThrowIfNull(branch);
 
-        return Path.Combine(_rootDirectory, CustomBranchDirectory, branch, organization);
+        return Path.Combine(_rootDirectory, IPathToRepositoryProvider.CustomBranchDirectory, branch, organization);
     }
 
     public string GetPathToRepositoryWithBranch(string organization, string repository, string branch)
@@ -48,6 +49,6 @@ public class OrganizationReplicatorPathProvider : IOrganizationReplicatorPathPro
         ArgumentNullException.ThrowIfNull(repository);
         ArgumentNullException.ThrowIfNull(branch);
 
-        return Path.Combine(_rootDirectory, CustomBranchDirectory, branch, organization, repository);
+        return Path.Combine(_rootDirectory, IPathToRepositoryProvider.CustomBranchDirectory, branch, organization, repository);
     }
 }

@@ -21,7 +21,7 @@ public class RepositoryFetcher
         _fetchOptions = fetchOptions;
     }
 
-    public string EnsureRepositoryUpdated(IPathToRepositoryFormatter pathFormatter, GithubRepository githubRepository)
+    public string EnsureRepositoryUpdated(IPathToRepositoryProvider pathProvider, GithubRepository githubRepository)
     {
         try
         {
@@ -35,17 +35,10 @@ public class RepositoryFetcher
 
         string EnsureRepositoryUpdatedInternal()
         {
-            string remoteUrl = githubRepository.ToGithubGitUrl();
-            string targetPath = pathFormatter.FormatFolderPath(githubRepository);
+            string targetPath = pathProvider.GetPathToRepository(githubRepository);
 
-            if (!Directory.Exists(targetPath))
-            {
-                Log.Debug($"Create directory for cloning repo. Repository: {githubRepository}, folder: {targetPath}");
-                Directory.CreateDirectory(targetPath);
-                var cloneOptions = new CloneOptions { CredentialsProvider = CreateCredentialsProvider };
-                Repository.Clone(remoteUrl, targetPath, cloneOptions);
+            if (CloneRepositoryIfNeed(targetPath, githubRepository))
                 return targetPath;
-            }
 
             Log.Debug($"Try to fetch updates from remote repository. Repository: {githubRepository}, folder: {targetPath}");
             using var repo = new Repository(targetPath);
@@ -57,14 +50,15 @@ public class RepositoryFetcher
         }
     }
 
-    public string Checkout(IPathToRepositoryFormatter pathFormatter, GithubRepository githubRepository, string branch)
+    public string Checkout(IPathToRepositoryProvider pathProvider, GithubRepository githubRepository, string branch)
     {
-        ArgumentNullException.ThrowIfNull(pathFormatter);
+        ArgumentNullException.ThrowIfNull(pathProvider);
         ArgumentNullException.ThrowIfNull(branch);
 
         Log.Debug($"Checkout branch. Repository: {githubRepository}, branch: {branch}");
-        
-        string targetPath = pathFormatter.FormatFolderPath(githubRepository);
+        string targetPath = pathProvider.GetPathToRepositoryWithBranch(githubRepository.Owner, githubRepository.Name, branch);
+        CloneRepositoryIfNeed(targetPath, githubRepository);
+
         try
         {
             using var repo = new Repository(targetPath);
@@ -88,6 +82,10 @@ public class RepositoryFetcher
                 return targetPath;
             }
 
+            var fetchOptions = new FetchOptions { CredentialsProvider = CreateCredentialsProvider };
+            Remote remote = repo.Network.Remotes["origin"];
+            List<string> refSpecs = remote.FetchRefSpecs.Select(x => x.Specification).ToList();
+            Commands.Fetch(repo, remote.Name, refSpecs, fetchOptions, string.Empty);
             Commands.Checkout(repo, repoBranch, _fetchOptions.CheckoutOptions);
             return targetPath;
         }
@@ -96,6 +94,20 @@ public class RepositoryFetcher
             var message = $"Exception while checkout repo: {githubRepository}, branch: {branch}";
             throw new GithubUtilsException(message, e);
         }
+    }
+
+    private bool CloneRepositoryIfNeed(string targetPath, GithubRepository githubRepository)
+    {
+        string remoteUrl = githubRepository.ToGithubGitUrl();
+
+        if (Directory.Exists(targetPath))
+            return false;
+        
+        Log.Debug($"Create directory for cloning repo. Repository: {githubRepository}, folder: {targetPath}");
+        Directory.CreateDirectory(targetPath);
+        var cloneOptions = new CloneOptions { CredentialsProvider = CreateCredentialsProvider };
+        Repository.Clone(remoteUrl, targetPath, cloneOptions);
+        return true;
     }
 
     private UsernamePasswordCredentials CreateCredentialsProvider(string url, string usernameFromUrl, SupportedCredentialTypes types)
