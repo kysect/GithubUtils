@@ -1,4 +1,7 @@
-﻿namespace Kysect.GithubUtils.OrganizationReplicator;
+﻿using Kysect.GithubUtils.RepositoryDiscovering;
+using Kysect.GithubUtils.RepositorySync;
+
+namespace Kysect.GithubUtils.OrganizationReplicator;
 
 public class OrganizationReplicationHub
 {
@@ -28,5 +31,16 @@ public class OrganizationReplicationHub
         string pathToOrganizations = _pathProvider.GetPathToOrganizations();
         Directory.CreateDirectory(pathToOrganizations);
         return Directory.EnumerateDirectories(pathToOrganizations).ToList();
+    }
+
+    public void SyncOrganizations(IRepositoryDiscoveryService discoveryService, RepositoryFetcher repositoryFetcher)
+    {
+        var pathFormatter = new ReplicatorPathToRepositoryFormatter(_pathProvider);
+        var organizationFetcher = new OrganizationFetcher(discoveryService, repositoryFetcher, pathFormatter);
+
+        foreach (string organizationName in GetOrganizationNames())
+        {
+            organizationFetcher.Fetch(organizationName);
+        }
     }
 }
