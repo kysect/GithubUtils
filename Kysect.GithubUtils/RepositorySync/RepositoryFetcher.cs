@@ -6,25 +6,22 @@ namespace Kysect.GithubUtils.RepositorySync;
 
 public class RepositoryFetcher
 {
-    private readonly IPathToRepositoryFormatter _pathFormatter;
     private readonly string _gitUser;
     private readonly string _token;
     private readonly RepositoryFetchOptions _fetchOptions;
 
-    public RepositoryFetcher(IPathToRepositoryFormatter pathFormatter, string gitUser, string token, RepositoryFetchOptions fetchOptions)
+    public RepositoryFetcher(string gitUser, string token, RepositoryFetchOptions fetchOptions)
     {
-        ArgumentNullException.ThrowIfNull(pathFormatter);
         ArgumentNullException.ThrowIfNull(gitUser);
         ArgumentNullException.ThrowIfNull(token);
         ArgumentNullException.ThrowIfNull(fetchOptions);
 
-        _pathFormatter = pathFormatter;
         _gitUser = gitUser;
         _token = token;
         _fetchOptions = fetchOptions;
     }
 
-    public string EnsureRepositoryUpdated(GithubRepository githubRepository)
+    public string EnsureRepositoryUpdated(IPathToRepositoryFormatter pathFormatter, GithubRepository githubRepository)
     {
         try
         {
@@ -39,7 +36,7 @@ public class RepositoryFetcher
         string EnsureRepositoryUpdatedInternal()
         {
             string remoteUrl = githubRepository.ToGithubGitUrl();
-            string targetPath = _pathFormatter.FormatFolderPath(githubRepository);
+            string targetPath = pathFormatter.FormatFolderPath(githubRepository);
 
             if (!Directory.Exists(targetPath))
             {
@@ -60,11 +57,14 @@ public class RepositoryFetcher
         }
     }
 
-    public string Checkout(GithubRepository githubRepository, string branch)
+    public string Checkout(IPathToRepositoryFormatter pathFormatter, GithubRepository githubRepository, string branch)
     {
+        ArgumentNullException.ThrowIfNull(pathFormatter);
+        ArgumentNullException.ThrowIfNull(branch);
+
         Log.Debug($"Checkout branch. Repository: {githubRepository}, branch: {branch}");
         
-        string targetPath = _pathFormatter.FormatFolderPath(githubRepository);
+        string targetPath = pathFormatter.FormatFolderPath(githubRepository);
         try
         {
             using var repo = new Repository(targetPath);
