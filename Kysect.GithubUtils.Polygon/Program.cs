@@ -1,4 +1,4 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using Kysect.GithubUtils;
 using Kysect.GithubUtils.Models;
 using Kysect.GithubUtils.OrganizationReplication;
@@ -10,8 +10,7 @@ Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
     .CreateLogger();
 
-CheckFetcher();
-CheckStatParser();
+CloneCustomBranch();
 
 void CheckFetcher()
 {
@@ -29,4 +28,17 @@ void CheckStatParser()
     IGithubActivityProvider provider = new GithubActivityProvider();
     ActivityInfo activityInfo = provider.GetActivityInfo("FrediKats");
     Console.WriteLine(JsonSerializer.Serialize(activityInfo.PerMonthActivity()));
+}
+
+void CloneCustomBranch()
+{
+    var gitUser = "fredikats";
+    var token = string.Empty;
+    var repositoryFetcher = new RepositoryFetcher(gitUser, token, new RepositoryFetchOptions());
+    var organizationReplicatorPathProvider = new OrganizationReplicatorPathProvider("test-repos");
+    var organizationReplicationHub = new OrganizationReplicationHub(organizationReplicatorPathProvider, repositoryFetcher);
+    organizationReplicationHub.TryAddOrganization("fredikats");
+    OrganizationReplicator organizationReplicator = organizationReplicationHub.GetOrganizationReplicator("fredikats");
+    organizationReplicator.FetchUpdates("fredikats");
+    organizationReplicator.Checkout("fredikats", "master");
 }
