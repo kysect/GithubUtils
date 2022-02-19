@@ -23,7 +23,7 @@ public class OrganizationReplicator
 
     public void CloneBranch(string repository, string branch)
     {
-        _repositoryFetcher.Checkout(_pathProvider, new GithubRepository(_organizationName, repository), branch);
+        _repositoryFetcher.Checkout(_pathProvider, new GithubRepositoryBranch(_organizationName, repository, branch));
     }
 
     public void CloneAllBranches(string repository)
