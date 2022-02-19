@@ -134,7 +134,7 @@ public class RepositoryFetcher
         return new UsernamePasswordCredentials { Username = _gitUser, Password = _token };
     }
 
-    private IReadOnlyCollection<GithubRepositoryBranch> EnumerateBranches(Repository gitRepository, GithubRepository githubRepository)
+    private static IReadOnlyCollection<GithubRepositoryBranch> EnumerateBranches(Repository gitRepository, GithubRepository githubRepository)
     {
         return gitRepository
             .Branches

@@ -64,6 +64,7 @@ public class OrganizationReplicationHub
     public IReadOnlyCollection<GithubRepository> GetRepositories(string organizationName, bool useMasterBranch, params string[] branches)
     {
         ArgumentNullException.ThrowIfNull(organizationName);
+        ArgumentNullException.ThrowIfNull(branches);
 
         var result = new List<GithubRepository>();
         if (useMasterBranch)
