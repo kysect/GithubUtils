@@ -2,7 +2,7 @@
 using Kysect.GithubUtils.RepositoryDiscovering;
 using Kysect.GithubUtils.RepositorySync;
 
-namespace Kysect.GithubUtils.OrganizationReplicator;
+namespace Kysect.GithubUtils.OrganizationReplication;
 
 public class OrganizationReplicationHub
 {

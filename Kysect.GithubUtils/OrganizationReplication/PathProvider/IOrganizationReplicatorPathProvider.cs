@@ -1,7 +1,6 @@
-﻿using Kysect.GithubUtils.Models;
-using Kysect.GithubUtils.RepositorySync;
+﻿using Kysect.GithubUtils.RepositorySync;
 
-namespace Kysect.GithubUtils.OrganizationReplicator;
+namespace Kysect.GithubUtils.OrganizationReplication;
 
 public interface IOrganizationReplicatorPathProvider : IPathToRepositoryProvider
 {
