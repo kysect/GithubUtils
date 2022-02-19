@@ -82,6 +82,10 @@ public class RepositoryFetcher
                 return targetPath;
             }
 
+            var fetchOptions = new FetchOptions { CredentialsProvider = CreateCredentialsProvider };
+            Remote remote = repo.Network.Remotes["origin"];
+            List<string> refSpecs = remote.FetchRefSpecs.Select(x => x.Specification).ToList();
+            Commands.Fetch(repo, remote.Name, refSpecs, fetchOptions, string.Empty);
             Commands.Checkout(repo, repoBranch, _fetchOptions.CheckoutOptions);
             return targetPath;
         }
