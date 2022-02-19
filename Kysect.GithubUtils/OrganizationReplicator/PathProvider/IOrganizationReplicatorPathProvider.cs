@@ -1,22 +1,11 @@
 ﻿using Kysect.GithubUtils.Models;
+using Kysect.GithubUtils.RepositorySync;
 
 namespace Kysect.GithubUtils.OrganizationReplicator;
 
-public interface IOrganizationReplicatorPathProvider
+public interface IOrganizationReplicatorPathProvider : IPathToRepositoryProvider
 {
     string GetPathToOrganizations();
     string GetPathToOrganization(string organization);
-    string GetPathToRepository(string organization, string repository);
     string GetPathToOrganizationWithBranch(string organization, string branch);
-    string GetPathToRepositoryWithBranch(string organization, string branch, string repository);
-}
-
-public static class OrganizationReplicatorPathProviderExtensions
-{
-    public static string GetPathToRepository(this IOrganizationReplicatorPathProvider pathProvider,GithubRepository githubRepository)
-    {
-        ArgumentNullException.ThrowIfNull(pathProvider);
-
-        return pathProvider.GetPathToRepository(githubRepository.Owner, githubRepository.Name);
-    }
 }
