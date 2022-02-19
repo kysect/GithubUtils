@@ -2,7 +2,7 @@
 
 namespace Kysect.GithubUtils.RepositoryDiscovering;
 
-internal sealed class GitHubRepository
+internal sealed class GitHubRepositoryDto
 {
     [JsonPropertyName("name")]
     public string Name { get; set; }

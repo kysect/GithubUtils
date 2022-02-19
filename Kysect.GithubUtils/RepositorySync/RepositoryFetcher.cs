@@ -63,6 +63,16 @@ public class RepositoryFetcher
 
         try
         {
+            return CheckoutInternal();
+        }
+        catch (Exception e)
+        {
+            var message = $"Exception while checkout repo: {githubRepository}, branch: {branch}";
+            throw new GithubUtilsException(message, e);
+        }
+
+        string CheckoutInternal()
+        {
             using var repo = new Repository(targetPath);
             Branch repoBranch = repo.Branches[branch];
             if (repoBranch is null)
@@ -80,23 +90,16 @@ public class RepositoryFetcher
                     throw new ArgumentException(message);
                 else
                     Log.Debug($"Skip checkout to branch {branch}. No such branch in {githubRepository}.");
-                
+
                 return targetPath;
             }
 
             var fetchOptions = new FetchOptions { CredentialsProvider = CreateCredentialsProvider };
             Remote remote = repo.Network.Remotes["origin"];
-            Remote remote1 = repo.Network.Remotes["origin"];
-            List<string> refSpecs1 = remote1.FetchRefSpecs.Select(x => x.Specification).ToList();
-            IReadOnlyCollection<string> refSpecs = refSpecs1;
+            List<string> refSpecs = remote.FetchRefSpecs.Select(x => x.Specification).ToList();
             Commands.Fetch(repo, remote.Name, refSpecs, fetchOptions, string.Empty);
             Commands.Checkout(repo, repoBranch, _fetchOptions.CheckoutOptions);
             return targetPath;
-        }
-        catch (Exception e)
-        {
-            var message = $"Exception while checkout repo: {githubRepository}, branch: {branch}";
-            throw new GithubUtilsException(message, e);
         }
     }
 
