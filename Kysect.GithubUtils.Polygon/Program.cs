@@ -10,8 +10,6 @@ Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
     .CreateLogger();
 
-CloneAllBranches();
-
 void CheckFetcher()
 {
     var gitUser = string.Empty;
