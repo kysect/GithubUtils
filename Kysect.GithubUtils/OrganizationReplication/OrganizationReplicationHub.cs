@@ -61,6 +61,21 @@ public class OrganizationReplicationHub
             .ToList();
     }
 
+    public IReadOnlyCollection<GithubRepository> GetRepositories(string organizationName, bool useMasterBranch, params string[] branches)
+    {
+        ArgumentNullException.ThrowIfNull(organizationName);
+        ArgumentNullException.ThrowIfNull(branches);
+
+        var result = new List<GithubRepository>();
+        if (useMasterBranch)
+            result.AddRange(GetRepositories(organizationName));
+
+        foreach (string branch in branches)
+            result.AddRange(GetRepositories(organizationName, branch));
+
+        return result;
+    }
+
     public void SyncOrganizations(IRepositoryDiscoveryService discoveryService)
     {
         var organizationFetcher = new OrganizationFetcher(discoveryService, _repositoryFetcher, _pathProvider);

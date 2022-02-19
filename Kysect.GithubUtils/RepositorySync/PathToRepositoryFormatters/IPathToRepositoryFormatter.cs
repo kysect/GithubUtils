@@ -19,4 +19,11 @@ public static class PathToRepositoryProviderExtensions
 
         return pathProvider.GetPathToRepository(githubRepository.Owner, githubRepository.Name);
     }
+
+    public static string GetPathToRepositoryWithBranch(this IPathToRepositoryProvider pathProvider, GithubRepositoryBranch repositoryBranch)
+    {
+        ArgumentNullException.ThrowIfNull(pathProvider);
+
+        return pathProvider.GetPathToRepositoryWithBranch(repositoryBranch.Owner, repositoryBranch.Branch, repositoryBranch.Name);
+    }
 }

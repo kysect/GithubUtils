@@ -39,7 +39,7 @@ public class GithubHttpClient : IDisposable
         _httpClient.Dispose();
     }
 
-    internal async Task<GitHubRepository[]> GetOnePageOfRepositories(
+    internal async Task<GitHubRepositoryDto[]> GetOnePageOfRepositories(
         string organization,
         int currentPage,
         GitHubRepositoryType repositoryTypeFilter = GitHubRepositoryType.All)
@@ -63,7 +63,7 @@ public class GithubHttpClient : IDisposable
                 "Network error occured during web request", e);
         }
 
-        return await responseMessage.ProcessResponseMessage<GitHubRepository[]>();
+        return await responseMessage.ProcessResponseMessage<GitHubRepositoryDto[]>();
     }
 
     private static string BuildRepositoryListingEndpoint(string organization,

@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using Kysect.GithubUtils;
 using Kysect.GithubUtils.Models;
 using Kysect.GithubUtils.OrganizationReplication;
@@ -10,8 +10,6 @@ Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
     .CreateLogger();
 
-CloneCustomBranch();
-
 void CheckFetcher()
 {
     var gitUser = string.Empty;
@@ -19,8 +17,8 @@ void CheckFetcher()
     var repositoryFetcher = new RepositoryFetcher(gitUser, token, new RepositoryFetchOptions());
     var githubRepository = new GithubRepository("fredikats", "test");
     repositoryFetcher.EnsureRepositoryUpdated(new FullPathProvider("repo"), githubRepository);
-    repositoryFetcher.Checkout(new FullPathProvider("repo"), githubRepository, "main");
-    repositoryFetcher.Checkout(new FullPathProvider("repo"), githubRepository, "qq");
+    repositoryFetcher.Checkout(new FullPathProvider("repo"), new GithubRepositoryBranch(githubRepository, "main"));
+    repositoryFetcher.Checkout(new FullPathProvider("repo"), new GithubRepositoryBranch(githubRepository, "qq"));
 }
 
 void CheckStatParser()
@@ -39,6 +37,6 @@ void CloneCustomBranch()
     var organizationReplicationHub = new OrganizationReplicationHub(organizationReplicatorPathProvider, repositoryFetcher);
     organizationReplicationHub.TryAddOrganization("fredikats");
     OrganizationReplicator organizationReplicator = organizationReplicationHub.GetOrganizationReplicator("fredikats");
-    organizationReplicator.FetchUpdates("fredikats");
-    organizationReplicator.Checkout("fredikats", "master");
+    organizationReplicator.Clone("fredikats");
+    organizationReplicator.CloneBranch("fredikats", "master");
 }

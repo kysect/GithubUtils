@@ -16,13 +16,18 @@ public class OrganizationReplicator
         _repositoryFetcher = repositoryFetcher;
     }
 
-    public void FetchUpdates(string repository)
+    public void Clone(string repository)
     {
         _repositoryFetcher.EnsureRepositoryUpdated(_pathProvider, new GithubRepository(_organizationName, repository));
     }
 
-    public void Checkout(string repository, string branch)
+    public void CloneBranch(string repository, string branch)
     {
-        _repositoryFetcher.Checkout(_pathProvider, new GithubRepository(_organizationName, repository), branch);
+        _repositoryFetcher.Checkout(_pathProvider, new GithubRepositoryBranch(_organizationName, repository, branch));
+    }
+
+    public void CloneAllBranches(string repository)
+    {
+        _repositoryFetcher.CloneAllBranches(_pathProvider, new GithubRepository(_organizationName, repository));
     }
 }
