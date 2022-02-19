@@ -51,9 +51,10 @@ public class OrganizationFetcher
 
     private GithubOrganizationRepository SyncRepository(RepositoryRecord repository, string organizationName, string? branch)
     {
-        string path = _repositoryFetcher.EnsureRepositoryUpdated(_pathFormatter, new GithubRepository(organizationName, repository.Name));
+        var githubRepository = new GithubRepository(organizationName, repository.Name);
+        string path = _repositoryFetcher.EnsureRepositoryUpdated(_pathFormatter, githubRepository);
         if (branch is not null)
-            _repositoryFetcher.Checkout(_pathFormatter, new GithubRepository(organizationName, repository.Name), branch);
+            _repositoryFetcher.Checkout(_pathFormatter, githubRepository, branch);
 
         return new GithubOrganizationRepository(path, organizationName, repository.Name);
     }

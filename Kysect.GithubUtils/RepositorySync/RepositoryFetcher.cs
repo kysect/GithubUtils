@@ -59,6 +59,9 @@ public class RepositoryFetcher
 
     public string Checkout(IPathToRepositoryFormatter pathFormatter, GithubRepository githubRepository, string branch)
     {
+        ArgumentNullException.ThrowIfNull(pathFormatter);
+        ArgumentNullException.ThrowIfNull(branch);
+
         Log.Debug($"Checkout branch. Repository: {githubRepository}, branch: {branch}");
         
         string targetPath = pathFormatter.FormatFolderPath(githubRepository);

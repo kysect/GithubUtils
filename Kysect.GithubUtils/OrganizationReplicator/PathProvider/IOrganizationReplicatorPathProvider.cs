@@ -14,6 +14,8 @@ public static class OrganizationReplicatorPathProviderExtensions
 {
     public static string GetPathToRepository(this IOrganizationReplicatorPathProvider pathProvider,GithubRepository githubRepository)
     {
+        ArgumentNullException.ThrowIfNull(pathProvider);
+
         return pathProvider.GetPathToRepository(githubRepository.Owner, githubRepository.Name);
     }
 }
