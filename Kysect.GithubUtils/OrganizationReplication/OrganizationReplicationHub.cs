@@ -7,12 +7,14 @@ namespace Kysect.GithubUtils.OrganizationReplication;
 public class OrganizationReplicationHub
 {
     private readonly IOrganizationReplicatorPathProvider _pathProvider;
+    private readonly RepositoryFetcher _repositoryFetcher;
 
-    public OrganizationReplicationHub(IOrganizationReplicatorPathProvider pathProvider)
+    public OrganizationReplicationHub(IOrganizationReplicatorPathProvider pathProvider, RepositoryFetcher repositoryFetcher)
     {
         ArgumentNullException.ThrowIfNull(pathProvider);
 
         _pathProvider = pathProvider;
+        _repositoryFetcher = repositoryFetcher;
     }
 
     public bool TryAddOrganization(string organizationName)
@@ -59,13 +61,18 @@ public class OrganizationReplicationHub
             .ToList();
     }
 
-    public void SyncOrganizations(IRepositoryDiscoveryService discoveryService, RepositoryFetcher repositoryFetcher)
+    public void SyncOrganizations(IRepositoryDiscoveryService discoveryService)
     {
-        var organizationFetcher = new OrganizationFetcher(discoveryService, repositoryFetcher, _pathProvider);
+        var organizationFetcher = new OrganizationFetcher(discoveryService, _repositoryFetcher, _pathProvider);
 
         foreach (string organizationName in GetOrganizationNames())
         {
             organizationFetcher.Fetch(organizationName);
         }
+    }
+
+    public OrganizationReplicator GetOrganizationReplicator(string repository)
+    {
+        return new OrganizationReplicator(_pathProvider, repository, _repositoryFetcher);
     }
 }
