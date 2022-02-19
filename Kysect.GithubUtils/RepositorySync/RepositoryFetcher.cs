@@ -1,4 +1,5 @@
 ﻿using Kysect.GithubUtils.Models;
+using Kysect.GithubUtils.OrganizationReplication;
 using LibGit2Sharp;
 using Serilog;
 
@@ -56,7 +57,8 @@ public class RepositoryFetcher
         ArgumentNullException.ThrowIfNull(branch);
 
         Log.Debug($"Checkout branch. Repository: {githubRepository}, branch: {branch}");
-        string targetPath = pathProvider.GetPathToRepositoryWithBranch(githubRepository.Owner, githubRepository.Name, branch);
+        string targetPath = pathProvider.GetPathToRepositoryWithBranch(githubRepository, branch);
+        Log.Debug($"Branch for {githubRepository}/{branch}: {targetPath}");
         CloneRepositoryIfNeed(targetPath, githubRepository);
 
         try
@@ -84,7 +86,9 @@ public class RepositoryFetcher
 
             var fetchOptions = new FetchOptions { CredentialsProvider = CreateCredentialsProvider };
             Remote remote = repo.Network.Remotes["origin"];
-            List<string> refSpecs = remote.FetchRefSpecs.Select(x => x.Specification).ToList();
+            Remote remote1 = repo.Network.Remotes["origin"];
+            List<string> refSpecs1 = remote1.FetchRefSpecs.Select(x => x.Specification).ToList();
+            IReadOnlyCollection<string> refSpecs = refSpecs1;
             Commands.Fetch(repo, remote.Name, refSpecs, fetchOptions, string.Empty);
             Commands.Checkout(repo, repoBranch, _fetchOptions.CheckoutOptions);
             return targetPath;
@@ -93,6 +97,19 @@ public class RepositoryFetcher
         {
             var message = $"Exception while checkout repo: {githubRepository}, branch: {branch}";
             throw new GithubUtilsException(message, e);
+        }
+    }
+
+    public void CloneAllBranches(IOrganizationReplicatorPathProvider pathProvider, GithubRepository githubRepository)
+    {
+        string masterClonePath = pathProvider.GetPathToRepository(githubRepository);
+        CloneRepositoryIfNeed(masterClonePath, githubRepository);
+        using var repository = new Repository(masterClonePath);
+
+        IReadOnlyCollection<string> branches = EnumerateBranches(repository);
+        foreach (string branch in branches)
+        {
+            Checkout(pathProvider, githubRepository, branch);
         }
     }
 
@@ -113,5 +130,15 @@ public class RepositoryFetcher
     private UsernamePasswordCredentials CreateCredentialsProvider(string url, string usernameFromUrl, SupportedCredentialTypes types)
     {
         return new UsernamePasswordCredentials { Username = _gitUser, Password = _token };
+    }
+
+    private IReadOnlyCollection<string> EnumerateBranches(Repository repository)
+    {
+        return repository
+            .Branches
+            .Where(b => b.FriendlyName.StartsWith("origin/"))
+            .Select(b => b.FriendlyName)
+            .Select(b => b.Substring("remote/".Length))
+            .ToList();
     }
 }
