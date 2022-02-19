@@ -9,12 +9,14 @@ public class OrganizationFetcher
     private readonly bool _useParallelProcessing;
 
     private readonly RepositoryFetcher _repositoryFetcher;
+    private readonly IPathToRepositoryFormatter _pathFormatter;
     private readonly IRepositoryDiscoveryService _discoveryService;
 
-    public OrganizationFetcher(IRepositoryDiscoveryService discoveryService, RepositoryFetcher repositoryFetcher, bool useParallelProcessing = true)
+    public OrganizationFetcher(IRepositoryDiscoveryService discoveryService, RepositoryFetcher repositoryFetcher, IPathToRepositoryFormatter pathFormatter, bool useParallelProcessing = true)
     {
         _discoveryService = discoveryService;
         _repositoryFetcher = repositoryFetcher;
+        _pathFormatter = pathFormatter;
         _useParallelProcessing = useParallelProcessing;
     }
 
@@ -49,9 +51,9 @@ public class OrganizationFetcher
 
     private GithubOrganizationRepository SyncRepository(RepositoryRecord repository, string organizationName, string? branch)
     {
-        string path = _repositoryFetcher.EnsureRepositoryUpdated(new GithubRepository(organizationName, repository.Name));
+        string path = _repositoryFetcher.EnsureRepositoryUpdated(_pathFormatter, new GithubRepository(organizationName, repository.Name));
         if (branch is not null)
-            _repositoryFetcher.Checkout(new GithubRepository(organizationName, repository.Name), branch);
+            _repositoryFetcher.Checkout(_pathFormatter, new GithubRepository(organizationName, repository.Name), branch);
 
         return new GithubOrganizationRepository(path, organizationName, repository.Name);
     }

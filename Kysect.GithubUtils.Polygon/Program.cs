@@ -1,7 +1,6 @@
 ﻿using System.Text.Json;
 using Kysect.GithubUtils;
 using Kysect.GithubUtils.Models;
-using Kysect.GithubUtils.OrganizationReplicator;
 using Kysect.GithubUtils.RepositorySync;
 using Serilog;
 
@@ -17,11 +16,11 @@ void CheckFetcher()
 {
     var gitUser = string.Empty;
     var token = string.Empty;
-    var repositoryFetcher = new RepositoryFetcher(new FullPathFormatter("repo"), gitUser, token, new RepositoryFetchOptions());
+    var repositoryFetcher = new RepositoryFetcher(gitUser, token, new RepositoryFetchOptions());
     var githubRepository = new GithubRepository("fredikats", "test");
-    repositoryFetcher.EnsureRepositoryUpdated(githubRepository);
-    repositoryFetcher.Checkout(githubRepository, "main");
-    repositoryFetcher.Checkout(githubRepository, "qq");
+    repositoryFetcher.EnsureRepositoryUpdated(new FullPathFormatter("repo"), githubRepository);
+    repositoryFetcher.Checkout(new FullPathFormatter("repo"), githubRepository, "main");
+    repositoryFetcher.Checkout(new FullPathFormatter("repo"), githubRepository, "qq");
 }
 
 void CheckStatParser()
