@@ -1,6 +1,8 @@
-﻿using Kysect.GithubUtils.Models;
+﻿using Kysect.CommonLib;
+using Kysect.GithubUtils.Models;
 using Kysect.GithubUtils.RepositoryDiscovering;
 using Kysect.GithubUtils.RepositorySync;
+using Serilog;
 
 namespace Kysect.GithubUtils.OrganizationReplication;
 
@@ -79,8 +81,12 @@ public class OrganizationReplicationHub
     public void SyncOrganizations(IRepositoryDiscoveryService discoveryService)
     {
         var organizationFetcher = new OrganizationFetcher(discoveryService, _repositoryFetcher, _pathProvider);
+        IReadOnlyCollection<string> organizationNames = GetOrganizationNames();
 
-        foreach (string organizationName in GetOrganizationNames())
+        Log.Debug($"Start organization sync. Organization count: {organizationNames.Count}");
+        Log.Verbose($"Organization list: {organizationNames.ToSingleString()}");
+
+        foreach (string organizationName in organizationNames)
         {
             organizationFetcher.Fetch(organizationName);
         }
