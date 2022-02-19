@@ -1,18 +1,28 @@
-﻿using Kysect.GithubUtils.Models;
+﻿namespace Kysect.GithubUtils.RepositorySync;
 
-namespace Kysect.GithubUtils.RepositorySync;
-
-public class RepositoryNameFolderFormatter : IPathToRepositoryFormatter
+public class RepositoryNameFolderProvider : IPathToRepositoryProvider
 {
     private readonly string _rootPath;
 
-    public RepositoryNameFolderFormatter(string rootPath)
+    public RepositoryNameFolderProvider(string rootPath)
     {
         _rootPath = rootPath;
     }
 
-    public string FormatFolderPath(GithubRepository githubRepository)
+    public string GetPathToRepository(string organization, string repository)
     {
-        return Path.Combine(_rootPath, githubRepository.Name);
+        ArgumentNullException.ThrowIfNull(organization);
+        ArgumentNullException.ThrowIfNull(repository);
+
+        return Path.Combine(_rootPath, IPathToRepositoryProvider.MainDirectory, repository);
+    }
+
+    public string GetPathToRepositoryWithBranch(string organization, string branch, string repository)
+    {
+        ArgumentNullException.ThrowIfNull(organization);
+        ArgumentNullException.ThrowIfNull(branch);
+        ArgumentNullException.ThrowIfNull(repository);
+
+        return Path.Combine(_rootPath, IPathToRepositoryProvider.CustomBranchDirectory, branch, repository);
     }
 }

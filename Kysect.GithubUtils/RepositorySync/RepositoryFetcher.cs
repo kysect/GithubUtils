@@ -21,7 +21,7 @@ public class RepositoryFetcher
         _fetchOptions = fetchOptions;
     }
 
-    public string EnsureRepositoryUpdated(IPathToRepositoryFormatter pathFormatter, GithubRepository githubRepository)
+    public string EnsureRepositoryUpdated(IPathToRepositoryProvider pathProvider, GithubRepository githubRepository)
     {
         try
         {
@@ -36,7 +36,7 @@ public class RepositoryFetcher
         string EnsureRepositoryUpdatedInternal()
         {
             string remoteUrl = githubRepository.ToGithubGitUrl();
-            string targetPath = pathFormatter.FormatFolderPath(githubRepository);
+            string targetPath = pathProvider.GetPathToRepository(githubRepository);
 
             if (!Directory.Exists(targetPath))
             {
@@ -57,14 +57,14 @@ public class RepositoryFetcher
         }
     }
 
-    public string Checkout(IPathToRepositoryFormatter pathFormatter, GithubRepository githubRepository, string branch)
+    public string Checkout(IPathToRepositoryProvider pathProvider, GithubRepository githubRepository, string branch)
     {
-        ArgumentNullException.ThrowIfNull(pathFormatter);
+        ArgumentNullException.ThrowIfNull(pathProvider);
         ArgumentNullException.ThrowIfNull(branch);
 
         Log.Debug($"Checkout branch. Repository: {githubRepository}, branch: {branch}");
         
-        string targetPath = pathFormatter.FormatFolderPath(githubRepository);
+        string targetPath = pathProvider.GetPathToRepositoryWithBranch(githubRepository.Owner, githubRepository.Name, branch);
         try
         {
             using var repo = new Repository(targetPath);

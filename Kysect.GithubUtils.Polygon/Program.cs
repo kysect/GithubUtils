@@ -18,9 +18,9 @@ void CheckFetcher()
     var token = string.Empty;
     var repositoryFetcher = new RepositoryFetcher(gitUser, token, new RepositoryFetchOptions());
     var githubRepository = new GithubRepository("fredikats", "test");
-    repositoryFetcher.EnsureRepositoryUpdated(new FullPathFormatter("repo"), githubRepository);
-    repositoryFetcher.Checkout(new FullPathFormatter("repo"), githubRepository, "main");
-    repositoryFetcher.Checkout(new FullPathFormatter("repo"), githubRepository, "qq");
+    repositoryFetcher.EnsureRepositoryUpdated(new FullPathProvider("repo"), githubRepository);
+    repositoryFetcher.Checkout(new FullPathProvider("repo"), githubRepository, "main");
+    repositoryFetcher.Checkout(new FullPathProvider("repo"), githubRepository, "qq");
 }
 
 void CheckStatParser()

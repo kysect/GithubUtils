@@ -61,8 +61,7 @@ public class OrganizationReplicationHub
 
     public void SyncOrganizations(IRepositoryDiscoveryService discoveryService, RepositoryFetcher repositoryFetcher)
     {
-        var pathFormatter = new ReplicatorPathToRepositoryFormatter(_pathProvider);
-        var organizationFetcher = new OrganizationFetcher(discoveryService, repositoryFetcher, pathFormatter);
+        var organizationFetcher = new OrganizationFetcher(discoveryService, repositoryFetcher, _pathProvider);
 
         foreach (string organizationName in GetOrganizationNames())
         {
