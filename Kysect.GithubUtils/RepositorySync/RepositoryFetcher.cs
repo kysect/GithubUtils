@@ -35,17 +35,10 @@ public class RepositoryFetcher
 
         string EnsureRepositoryUpdatedInternal()
         {
-            string remoteUrl = githubRepository.ToGithubGitUrl();
             string targetPath = pathProvider.GetPathToRepository(githubRepository);
 
-            if (!Directory.Exists(targetPath))
-            {
-                Log.Debug($"Create directory for cloning repo. Repository: {githubRepository}, folder: {targetPath}");
-                Directory.CreateDirectory(targetPath);
-                var cloneOptions = new CloneOptions { CredentialsProvider = CreateCredentialsProvider };
-                Repository.Clone(remoteUrl, targetPath, cloneOptions);
+            if (CloneRepositoryIfNeed(targetPath, githubRepository))
                 return targetPath;
-            }
 
             Log.Debug($"Try to fetch updates from remote repository. Repository: {githubRepository}, folder: {targetPath}");
             using var repo = new Repository(targetPath);
@@ -63,8 +56,9 @@ public class RepositoryFetcher
         ArgumentNullException.ThrowIfNull(branch);
 
         Log.Debug($"Checkout branch. Repository: {githubRepository}, branch: {branch}");
-        
         string targetPath = pathProvider.GetPathToRepositoryWithBranch(githubRepository.Owner, githubRepository.Name, branch);
+        CloneRepositoryIfNeed(targetPath, githubRepository);
+
         try
         {
             using var repo = new Repository(targetPath);
@@ -96,6 +90,20 @@ public class RepositoryFetcher
             var message = $"Exception while checkout repo: {githubRepository}, branch: {branch}";
             throw new GithubUtilsException(message, e);
         }
+    }
+
+    private bool CloneRepositoryIfNeed(string targetPath, GithubRepository githubRepository)
+    {
+        string remoteUrl = githubRepository.ToGithubGitUrl();
+
+        if (Directory.Exists(targetPath))
+            return false;
+        
+        Log.Debug($"Create directory for cloning repo. Repository: {githubRepository}, folder: {targetPath}");
+        Directory.CreateDirectory(targetPath);
+        var cloneOptions = new CloneOptions { CredentialsProvider = CreateCredentialsProvider };
+        Repository.Clone(remoteUrl, targetPath, cloneOptions);
+        return true;
     }
 
     private UsernamePasswordCredentials CreateCredentialsProvider(string url, string usernameFromUrl, SupportedCredentialTypes types)
