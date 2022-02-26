@@ -1,6 +1,7 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using Kysect.GithubUtils;
 using Kysect.GithubUtils.Models;
+using Kysect.GithubUtils.OrganizationReplication;
 using Kysect.GithubUtils.RepositorySync;
 using Serilog;
 
@@ -9,18 +10,15 @@ Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
     .CreateLogger();
 
-CheckFetcher();
-CheckStatParser();
-
 void CheckFetcher()
 {
     var gitUser = string.Empty;
     var token = string.Empty;
-    var repositoryFetcher = new RepositoryFetcher(new FullPathFormatter("repo"), gitUser, token, new RepositoryFetchOptions());
+    var repositoryFetcher = new RepositoryFetcher(new RepositoryFetchOptions(gitUser, token));
     var githubRepository = new GithubRepository("fredikats", "test");
-    repositoryFetcher.EnsureRepositoryUpdated(githubRepository);
-    repositoryFetcher.Checkout(githubRepository, "main");
-    repositoryFetcher.Checkout(githubRepository, "qq");
+    repositoryFetcher.EnsureRepositoryUpdated(new UseOwnerAndRepoForFolderNameStrategy("repo"), githubRepository);
+    repositoryFetcher.Checkout(new UseOwnerAndRepoForFolderNameStrategy("repo"), new GithubRepositoryBranch(githubRepository, "main"));
+    repositoryFetcher.Checkout(new UseOwnerAndRepoForFolderNameStrategy("repo"), new GithubRepositoryBranch(githubRepository, "qq"));
 }
 
 void CheckStatParser()
@@ -28,4 +26,17 @@ void CheckStatParser()
     IGithubActivityProvider provider = new GithubActivityProvider();
     ActivityInfo activityInfo = provider.GetActivityInfo("FrediKats");
     Console.WriteLine(JsonSerializer.Serialize(activityInfo.PerMonthActivity()));
+}
+
+void CloneCustomBranch()
+{
+    var gitUser = "fredikats";
+    var token = string.Empty;
+    var repositoryFetcher = new RepositoryFetcher(new RepositoryFetchOptions(gitUser, token));
+    var organizationReplicatorPathProvider = new OrganizationReplicatorPathFormatter("test-repos");
+    var organizationReplicationHub = new OrganizationReplicationHub(organizationReplicatorPathProvider, repositoryFetcher);
+    organizationReplicationHub.TryAddOrganization("fredikats");
+    OrganizationReplicator organizationReplicator = organizationReplicationHub.GetOrganizationReplicator("fredikats");
+    organizationReplicator.Clone("fredikats");
+    organizationReplicator.CloneBranch("fredikats", "master");
 }
