@@ -92,6 +92,20 @@ public class OrganizationReplicationHub
         }
     }
 
+    public void SyncOrganizations(IRepositoryDiscoveryService discoveryService, string branch)
+    {
+        var organizationFetcher = new OrganizationFetcher(discoveryService, _repositoryFetcher, _pathProvider);
+        IReadOnlyCollection<string> organizationNames = GetOrganizationNames();
+
+        Log.Debug($"Start organization sync. Organization count: {organizationNames.Count}");
+        Log.Verbose($"Organization list: {organizationNames.ToSingleString()}");
+
+        foreach (string organizationName in organizationNames)
+        {
+            organizationFetcher.Fetch(organizationName, branch);
+        }
+    }
+
     public OrganizationReplicator GetOrganizationReplicator(string repository)
     {
         return new OrganizationReplicator(_pathProvider, repository, _repositoryFetcher);
