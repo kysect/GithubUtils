@@ -25,8 +25,12 @@ namespace Kysect.GithubUtils
 
             if (_isParallel)
             {
+                Log.Debug("Use parallel processing for getting activity info.");
                 if (_withRetry)
+                {
+                    Log.Debug("Use retry processing for getting activity info.");
                     return GetInfoWithRetry(usernames, from, to);
+                }
 
                 //TODO: make async
                 return usernames

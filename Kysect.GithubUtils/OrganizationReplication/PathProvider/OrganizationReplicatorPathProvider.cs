@@ -4,8 +4,6 @@ namespace Kysect.GithubUtils.OrganizationReplication;
 
 public class OrganizationReplicatorPathProvider : IOrganizationReplicatorPathProvider
 {
-    
-
     private readonly string _rootDirectory;
 
     public OrganizationReplicatorPathProvider(string rootDirectory)
