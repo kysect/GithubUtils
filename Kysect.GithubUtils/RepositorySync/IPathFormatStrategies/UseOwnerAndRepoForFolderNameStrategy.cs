@@ -1,10 +1,10 @@
 ﻿namespace Kysect.GithubUtils.RepositorySync;
 
-public class FullPathProvider : IPathToRepositoryProvider
+public class UseOwnerAndRepoForFolderNameStrategy : IPathFormatStrategy
 {
     private readonly string _rootPath;
 
-    public FullPathProvider(string rootPath)
+    public UseOwnerAndRepoForFolderNameStrategy(string rootPath)
     {
         _rootPath = rootPath;
     }
@@ -14,7 +14,7 @@ public class FullPathProvider : IPathToRepositoryProvider
         ArgumentNullException.ThrowIfNull(organization);
         ArgumentNullException.ThrowIfNull(repository);
 
-        return Path.Combine(_rootPath, IPathToRepositoryProvider.MainDirectory, organization, repository);
+        return Path.Combine(_rootPath, IPathFormatStrategy.MainDirectory, organization, repository);
     }
 
     public string GetPathToRepositoryWithBranch(string organization, string branch, string repository)
@@ -23,6 +23,6 @@ public class FullPathProvider : IPathToRepositoryProvider
         ArgumentNullException.ThrowIfNull(branch);
         ArgumentNullException.ThrowIfNull(repository);
 
-        return Path.Combine(_rootPath, IPathToRepositoryProvider.CustomBranchDirectory, branch, organization, repository);
+        return Path.Combine(_rootPath, IPathFormatStrategy.CustomBranchDirectory, branch, organization, repository);
     }
 }

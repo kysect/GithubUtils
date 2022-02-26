@@ -2,7 +2,7 @@
 
 namespace Kysect.GithubUtils.OrganizationReplication;
 
-public interface IOrganizationReplicatorPathProvider : IPathToRepositoryProvider
+public interface IOrganizationReplicatorPathFormatter : IPathFormatStrategy
 {
     string GetPathToOrganizations();
     string GetPathToOrganization(string organization);
