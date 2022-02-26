@@ -7,18 +7,13 @@ namespace Kysect.GithubUtils.RepositorySync;
 
 public class RepositoryFetcher
 {
-    private readonly string _gitUser;
-    private readonly string _token;
     private readonly RepositoryFetchOptions _fetchOptions;
 
-    public RepositoryFetcher(string gitUser, string token, RepositoryFetchOptions fetchOptions)
+    public RepositoryFetcher(RepositoryFetchOptions fetchOptions)
     {
-        ArgumentNullException.ThrowIfNull(gitUser);
-        ArgumentNullException.ThrowIfNull(token);
+        
         ArgumentNullException.ThrowIfNull(fetchOptions);
 
-        _gitUser = gitUser;
-        _token = token;
         _fetchOptions = fetchOptions;
     }
 
@@ -43,10 +38,9 @@ public class RepositoryFetcher
 
             Log.Debug($"Try to fetch updates from remote repository. Repository: {githubRepository}, folder: {targetPath}");
             using var repo = new Repository(targetPath);
-            var fetchOptions = new FetchOptions { CredentialsProvider = CreateCredentialsProvider };
             Remote remote = repo.Network.Remotes["origin"];
             List<string> refSpecs = remote.FetchRefSpecs.Select(x => x.Specification).ToList();
-            Commands.Fetch(repo, remote.Name, refSpecs, fetchOptions, string.Empty);
+            Commands.Fetch(repo, remote.Name, refSpecs, _fetchOptions.FetchOptions, string.Empty);
             return targetPath;
         }
     }
@@ -93,10 +87,9 @@ public class RepositoryFetcher
                 return targetPath;
             }
 
-            var fetchOptions = new FetchOptions { CredentialsProvider = CreateCredentialsProvider };
             Remote remote = repo.Network.Remotes["origin"];
             List<string> refSpecs = remote.FetchRefSpecs.Select(x => x.Specification).ToList();
-            Commands.Fetch(repo, remote.Name, refSpecs, fetchOptions, string.Empty);
+            Commands.Fetch(repo, remote.Name, refSpecs, _fetchOptions.FetchOptions, string.Empty);
             Commands.Checkout(repo, repoBranch, _fetchOptions.CheckoutOptions);
             return targetPath;
         }
@@ -128,14 +121,8 @@ public class RepositoryFetcher
         
         Log.Debug($"Create directory for cloning repo. Repository: {githubRepository}, folder: {targetPath}");
         Directory.CreateDirectory(targetPath);
-        var cloneOptions = new CloneOptions { CredentialsProvider = CreateCredentialsProvider };
-        Repository.Clone(remoteUrl, targetPath, cloneOptions);
+        Repository.Clone(remoteUrl, targetPath, _fetchOptions.CloneOptions);
         return true;
-    }
-
-    private UsernamePasswordCredentials CreateCredentialsProvider(string url, string usernameFromUrl, SupportedCredentialTypes types)
-    {
-        return new UsernamePasswordCredentials { Username = _gitUser, Password = _token };
     }
 
     private static IReadOnlyCollection<GithubRepositoryBranch> EnumerateBranches(Repository gitRepository, GithubRepository githubRepository)
