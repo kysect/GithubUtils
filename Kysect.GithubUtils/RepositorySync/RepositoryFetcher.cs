@@ -11,7 +11,6 @@ public class RepositoryFetcher
 
     public RepositoryFetcher(RepositoryFetchOptions fetchOptions)
     {
-        
         ArgumentNullException.ThrowIfNull(fetchOptions);
 
         _fetchOptions = fetchOptions;
@@ -25,7 +24,8 @@ public class RepositoryFetcher
         }
         catch (Exception e)
         {
-            string message = $"Exception while updating repo: {githubRepository}";
+            string message = $"Exception while updating {githubRepository}.";
+            Log.Error($"{message} Error: {e.Message}");
             throw new GithubUtilsException(message, e);
         }
 
@@ -37,6 +37,7 @@ public class RepositoryFetcher
                 return targetPath;
 
             Log.Debug($"Try to fetch updates from remote repository. Repository: {githubRepository}, folder: {targetPath}");
+
             using var repo = new Repository(targetPath);
             Remote remote = repo.Network.Remotes["origin"];
             List<string> refSpecs = remote.FetchRefSpecs.Select(x => x.Specification).ToList();
@@ -45,14 +46,14 @@ public class RepositoryFetcher
         }
     }
 
-    public string Checkout(IPathToRepositoryProvider pathProvider, GithubRepositoryBranch repositoryBranch)
+    public string Checkout(IPathToRepositoryProvider pathProvider, GithubRepositoryBranch repositoryWithBranch)
     {
         ArgumentNullException.ThrowIfNull(pathProvider);
 
-        Log.Debug($"Checkout branch: {repositoryBranch}");
-        string targetPath = pathProvider.GetPathToRepositoryWithBranch(repositoryBranch);
-        Log.Debug($"Branch for {repositoryBranch}: {targetPath}");
-        CloneRepositoryIfNeed(targetPath, repositoryBranch.GetRepository());
+        Log.Debug($"Checkout branch: {repositoryWithBranch}");
+        string targetPath = pathProvider.GetPathToRepositoryWithBranch(repositoryWithBranch);
+        Log.Debug($"Branch for {repositoryWithBranch}: {targetPath}");
+        CloneRepositoryIfNeed(targetPath, repositoryWithBranch.GetRepository());
 
         try
         {
@@ -60,29 +61,34 @@ public class RepositoryFetcher
         }
         catch (Exception e)
         {
-            var message = $"Exception while checkout branch {repositoryBranch}";
+            var message = $"Exception while checkout {repositoryWithBranch}";
+            Log.Error($"{message} Error: {e.Message}");
             throw new GithubUtilsException(message, e);
         }
 
         string CheckoutInternal()
         {
             using var repo = new Repository(targetPath);
-            Branch repoBranch = repo.Branches[repositoryBranch.Branch];
-            if (repoBranch is null)
+            Branch selectedBranch = repo.Branches[repositoryWithBranch.Branch];
+            if (selectedBranch is null)
             {
-                repoBranch = repo.Branches[$"origin/{repositoryBranch}"];
+                Log.Verbose($"Branch {repositoryWithBranch} was not found, try to use origin/{selectedBranch}");
+                selectedBranch = repo.Branches[$"origin/{selectedBranch}"];
             }
 
-            if (repoBranch is null)
+            if (selectedBranch is null)
             {
-                var message = $"Specified branch was not found: {repositoryBranch}";
+                var message = $"Specified branch was not found: {repositoryWithBranch}";
                 Log.Error(message);
                 Log.Information("Available branches: " + string.Join(", ", repo.Branches.Select(b => b.FriendlyName)));
 
                 if (!_fetchOptions.IgnoreMissedBranch)
+                {
+                    Log.Error($"Failed to checkout {repositoryWithBranch}. Branch was not found.");
                     throw new ArgumentException(message);
-                else
-                    Log.Debug($"Skip checkout to branch {repositoryBranch}. No such branch in repository.");
+                }
+
+                Log.Warning($"Skip checkout to branch {repositoryWithBranch}. No such branch in repository.");
 
                 return targetPath;
             }
@@ -90,7 +96,7 @@ public class RepositoryFetcher
             Remote remote = repo.Network.Remotes["origin"];
             List<string> refSpecs = remote.FetchRefSpecs.Select(x => x.Specification).ToList();
             Commands.Fetch(repo, remote.Name, refSpecs, _fetchOptions.FetchOptions, string.Empty);
-            Commands.Checkout(repo, repoBranch, _fetchOptions.CheckoutOptions);
+            Commands.Checkout(repo, selectedBranch, _fetchOptions.CheckoutOptions);
             return targetPath;
         }
     }

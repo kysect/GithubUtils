@@ -25,7 +25,10 @@ public class OrganizationReplicationHub
 
         string organizationDirectoryPath = _pathProvider.GetPathToOrganization(organizationName);
         if (Directory.Exists(organizationDirectoryPath))
+        {
+            Log.Debug($"Organization {organizationName} already added to hub.");
             return false;
+        }
 
         Directory.CreateDirectory(organizationDirectoryPath);
         return true;
@@ -70,10 +73,20 @@ public class OrganizationReplicationHub
 
         var result = new List<GithubRepository>();
         if (useMasterBranch)
-            result.AddRange(GetRepositories(organizationName));
+        {
+            IReadOnlyCollection<GithubRepository> rootBranchRepos = GetRepositories(organizationName);
+            Log.Debug($"Found {rootBranchRepos.Count} repositories form root branch.");
+            Log.Verbose($"Repositories: {rootBranchRepos.ToSingleString()}");
+            result.AddRange(rootBranchRepos);
+        }
 
         foreach (string branch in branches)
-            result.AddRange(GetRepositories(organizationName, branch));
+        {
+            IReadOnlyCollection<GithubRepository> branchRepositories = GetRepositories(organizationName, branch);
+            Log.Debug($"Found {branchRepositories.Count} repositories form branch {branch}.");
+            Log.Verbose($"Repositories: {branchRepositories.ToSingleString()}");
+            result.AddRange(branchRepositories);
+        }
 
         return result;
     }
@@ -97,7 +110,7 @@ public class OrganizationReplicationHub
         var organizationFetcher = new OrganizationFetcher(discoveryService, _repositoryFetcher, _pathProvider);
         IReadOnlyCollection<string> organizationNames = GetOrganizationNames();
 
-        Log.Debug($"Start organization sync. Organization count: {organizationNames.Count}");
+        Log.Debug($"Start organization sync for branch {branch}. Organization count: {organizationNames.Count}");
         Log.Verbose($"Organization list: {organizationNames.ToSingleString()}");
 
         foreach (string organizationName in organizationNames)
