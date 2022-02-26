@@ -8,7 +8,7 @@
 		<RepositoryUrl>https://github.com/kysect/GithubUtils</RepositoryUrl>
 		<Company>Kysect</Company>
 		<Authors>Kysect</Authors>
-		<Version>1.0.7</Version>
+		<Version>1.0.8</Version>
 		<WarningLevel>5</WarningLevel>
 
 	</PropertyGroup>
