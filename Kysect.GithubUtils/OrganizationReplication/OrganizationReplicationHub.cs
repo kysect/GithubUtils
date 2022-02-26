@@ -8,14 +8,14 @@ namespace Kysect.GithubUtils.OrganizationReplication;
 
 public class OrganizationReplicationHub
 {
-    private readonly IOrganizationReplicatorPathProvider _pathProvider;
+    private readonly IOrganizationReplicatorPathFormatter _pathFormatter;
     private readonly RepositoryFetcher _repositoryFetcher;
 
-    public OrganizationReplicationHub(IOrganizationReplicatorPathProvider pathProvider, RepositoryFetcher repositoryFetcher)
+    public OrganizationReplicationHub(IOrganizationReplicatorPathFormatter pathFormatter, RepositoryFetcher repositoryFetcher)
     {
-        ArgumentNullException.ThrowIfNull(pathProvider);
+        ArgumentNullException.ThrowIfNull(pathFormatter);
 
-        _pathProvider = pathProvider;
+        _pathFormatter = pathFormatter;
         _repositoryFetcher = repositoryFetcher;
     }
 
@@ -23,7 +23,7 @@ public class OrganizationReplicationHub
     {
         ArgumentNullException.ThrowIfNull(organizationName);
 
-        string organizationDirectoryPath = _pathProvider.GetPathToOrganization(organizationName);
+        string organizationDirectoryPath = _pathFormatter.GetPathToOrganization(organizationName);
         if (Directory.Exists(organizationDirectoryPath))
         {
             Log.Debug($"Organization {organizationName} already added to hub.");
@@ -36,7 +36,7 @@ public class OrganizationReplicationHub
 
     public IReadOnlyCollection<string> GetOrganizationNames()
     {
-        string pathToOrganizations = _pathProvider.GetPathToOrganizations();
+        string pathToOrganizations = _pathFormatter.GetPathToOrganizations();
         Directory.CreateDirectory(pathToOrganizations);
         return Directory.EnumerateDirectories(pathToOrganizations).ToList();
     }
@@ -45,7 +45,7 @@ public class OrganizationReplicationHub
     {
         ArgumentNullException.ThrowIfNull(organizationName);
 
-        string pathToOrganization = _pathProvider.GetPathToOrganization(organizationName);
+        string pathToOrganization = _pathFormatter.GetPathToOrganization(organizationName);
         Directory.CreateDirectory(pathToOrganization);
         return Directory
             .EnumerateDirectories(pathToOrganization)
@@ -58,7 +58,7 @@ public class OrganizationReplicationHub
         ArgumentNullException.ThrowIfNull(organizationName);
         ArgumentNullException.ThrowIfNull(branch);
 
-        string pathToOrganization = _pathProvider.GetPathToOrganizationWithBranch(organizationName, branch);
+        string pathToOrganization = _pathFormatter.GetPathToOrganizationWithBranch(organizationName, branch);
         Directory.CreateDirectory(pathToOrganization);
         return Directory
             .EnumerateDirectories(pathToOrganization)
@@ -93,7 +93,7 @@ public class OrganizationReplicationHub
 
     public void SyncOrganizations(IRepositoryDiscoveryService discoveryService)
     {
-        var organizationFetcher = new OrganizationFetcher(discoveryService, _repositoryFetcher, _pathProvider);
+        var organizationFetcher = new OrganizationFetcher(discoveryService, _repositoryFetcher, _pathFormatter);
         IReadOnlyCollection<string> organizationNames = GetOrganizationNames();
 
         Log.Debug($"Start organization sync. Organization count: {organizationNames.Count}");
@@ -107,7 +107,7 @@ public class OrganizationReplicationHub
 
     public void SyncOrganizations(IRepositoryDiscoveryService discoveryService, string branch)
     {
-        var organizationFetcher = new OrganizationFetcher(discoveryService, _repositoryFetcher, _pathProvider);
+        var organizationFetcher = new OrganizationFetcher(discoveryService, _repositoryFetcher, _pathFormatter);
         IReadOnlyCollection<string> organizationNames = GetOrganizationNames();
 
         Log.Debug($"Start organization sync for branch {branch}. Organization count: {organizationNames.Count}");
@@ -121,6 +121,6 @@ public class OrganizationReplicationHub
 
     public OrganizationReplicator GetOrganizationReplicator(string repository)
     {
-        return new OrganizationReplicator(_pathProvider, repository, _repositoryFetcher);
+        return new OrganizationReplicator(_pathFormatter, repository, _repositoryFetcher);
     }
 }

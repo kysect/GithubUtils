@@ -16,7 +16,7 @@ public class RepositoryFetcher
         _fetchOptions = fetchOptions;
     }
 
-    public string EnsureRepositoryUpdated(IPathToRepositoryProvider pathProvider, GithubRepository githubRepository)
+    public string EnsureRepositoryUpdated(IPathFormatStrategy pathFormatter, GithubRepository githubRepository)
     {
         try
         {
@@ -31,7 +31,7 @@ public class RepositoryFetcher
 
         string EnsureRepositoryUpdatedInternal()
         {
-            string targetPath = pathProvider.GetPathToRepository(githubRepository);
+            string targetPath = pathFormatter.GetPathToRepository(githubRepository);
 
             if (CloneRepositoryIfNeed(targetPath, githubRepository))
                 return targetPath;
@@ -46,12 +46,12 @@ public class RepositoryFetcher
         }
     }
 
-    public string Checkout(IPathToRepositoryProvider pathProvider, GithubRepositoryBranch repositoryWithBranch)
+    public string Checkout(IPathFormatStrategy pathFormatter, GithubRepositoryBranch repositoryWithBranch)
     {
-        ArgumentNullException.ThrowIfNull(pathProvider);
+        ArgumentNullException.ThrowIfNull(pathFormatter);
 
         Log.Debug($"Checkout branch: {repositoryWithBranch}");
-        string targetPath = pathProvider.GetPathToRepositoryWithBranch(repositoryWithBranch);
+        string targetPath = pathFormatter.GetPathToRepositoryWithBranch(repositoryWithBranch);
         Log.Debug($"Branch for {repositoryWithBranch}: {targetPath}");
         CloneRepositoryIfNeed(targetPath, repositoryWithBranch.GetRepository());
 
@@ -101,9 +101,9 @@ public class RepositoryFetcher
         }
     }
 
-    public void CloneAllBranches(IOrganizationReplicatorPathProvider pathProvider, GithubRepository githubRepository)
+    public void CloneAllBranches(IOrganizationReplicatorPathFormatter pathFormatter, GithubRepository githubRepository)
     {
-        string masterClonePath = pathProvider.GetPathToRepository(githubRepository);
+        string masterClonePath = pathFormatter.GetPathToRepository(githubRepository);
 
         Log.Debug($"Try to clone all branches from {githubRepository} to {masterClonePath}");
         CloneRepositoryIfNeed(masterClonePath, githubRepository);
@@ -114,7 +114,7 @@ public class RepositoryFetcher
 
         foreach (GithubRepositoryBranch branch in branches)
         {
-            Checkout(pathProvider, branch);
+            Checkout(pathFormatter, branch);
         }
     }
 
