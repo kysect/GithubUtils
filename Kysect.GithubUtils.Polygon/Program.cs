@@ -14,7 +14,7 @@ void CheckFetcher()
 {
     var gitUser = string.Empty;
     var token = string.Empty;
-    var repositoryFetcher = new RepositoryFetcher(gitUser, token, new RepositoryFetchOptions());
+    var repositoryFetcher = new RepositoryFetcher(new RepositoryFetchOptions(gitUser, token));
     var githubRepository = new GithubRepository("fredikats", "test");
     repositoryFetcher.EnsureRepositoryUpdated(new FullPathProvider("repo"), githubRepository);
     repositoryFetcher.Checkout(new FullPathProvider("repo"), new GithubRepositoryBranch(githubRepository, "main"));
@@ -32,7 +32,7 @@ void CloneCustomBranch()
 {
     var gitUser = "fredikats";
     var token = string.Empty;
-    var repositoryFetcher = new RepositoryFetcher(gitUser, token, new RepositoryFetchOptions());
+    var repositoryFetcher = new RepositoryFetcher(new RepositoryFetchOptions(gitUser, token));
     var organizationReplicatorPathProvider = new OrganizationReplicatorPathProvider("test-repos");
     var organizationReplicationHub = new OrganizationReplicationHub(organizationReplicatorPathProvider, repositoryFetcher);
     organizationReplicationHub.TryAddOrganization("fredikats");
