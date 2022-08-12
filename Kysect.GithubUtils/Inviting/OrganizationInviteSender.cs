@@ -1,17 +1,13 @@
 ﻿using Kysect.GithubUtils.Tools.Extensions;
 using Octokit;
-using Octokit.Internal;
 using Serilog;
-using System.Globalization;
 
 namespace Kysect.GithubUtils;
 
 public class OrganizationInviteSender
 {
-    private readonly Credentials _credentials;
     private readonly GitHubClient _client;
-    private readonly OrganizationMembershipUpdate _addOrUpdateRequest;
-    private readonly string _clientName;
+    private readonly OrganizationMembershipUpdate _addOrUpdateRequest = new OrganizationMembershipUpdate();
 
     public OrganizationInviteSender(string token, string clientName = "kysect")
         : this(new Credentials(token), clientName)
@@ -20,13 +16,15 @@ public class OrganizationInviteSender
 
     public OrganizationInviteSender(Credentials credentials, string clientName = "kysect")
     {
-        _clientName = clientName;
-        _credentials = credentials;
         _client = new GitHubClient(new ProductHeaderValue(clientName))
         {
             Credentials = credentials
         };
-        _addOrUpdateRequest = new OrganizationMembershipUpdate();
+    }
+
+    public OrganizationInviteSender(GitHubClient client)
+    {
+        _client = client;
     }
 
     /// <summary>
@@ -119,20 +117,9 @@ public class OrganizationInviteSender
 
     public async Task<HashSet<string>> GetExpiredInvites(string organizationName)
     {
-        // TODO: replace after https://github.com/octokit/octokit.net/pull/2533 merged
-        
-        var connection = new Connection(
-            new ProductHeaderValue(_clientName),
-            new Uri("https://api.github.com/"),
-            new InMemoryCredentialStore(_credentials));
-
-        var apiConnection = new ApiConnection(connection);
-
-        var uri = new Uri(string.Format(CultureInfo.InvariantCulture, "/orgs/{0}/failed_invitations", organizationName), UriKind.Relative);
-        IReadOnlyList<OrganizationMembershipInvitation> users = await apiConnection.GetAll<OrganizationMembershipInvitation>(uri, null, ApiOptions.None);
-        return users
+        IReadOnlyList<OrganizationMembershipInvitation> failedInvitations = await _client.Organization.Member.GetAllFailedInvitations(organizationName);
+        return failedInvitations
             .Select(u => u.Login.ToLower())
             .ToHashSet();
     }
-
 }
