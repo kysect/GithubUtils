@@ -19,7 +19,6 @@ var client = new GitHubClient(new ProductHeaderValue("Kysect"))
     Credentials = new Credentials(token)
 };
 
-
 CheckOrgContributions(client, "kysect");
 
 void CheckFetcher()

@@ -30,7 +30,6 @@ public class OrganizationContributionFetcher
             .GroupBy(c => c.Login)
             .Select(g => new OrganizationContributor(g.Key, g.Sum(c => c.Contributions)))
             .ToList();
-
     }
 }
 
