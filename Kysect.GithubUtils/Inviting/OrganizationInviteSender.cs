@@ -1,5 +1,4 @@
-﻿using Kysect.GithubUtils.Tools.Extensions;
-using Octokit;
+﻿using Octokit;
 using Serilog;
 
 namespace Kysect.GithubUtils;
@@ -30,46 +29,65 @@ public class OrganizationInviteSender
     /// <summary>
     /// Github has limit 50 invites per day. So method call will fail after this limit.
     /// </summary>
-    public async Task<InviteResult> Invite(string organizationName, IReadOnlyCollection<string> usernames)
+    public async Task<IReadOnlyCollection<UserInviteResult>> Invite(string organizationName, IReadOnlyCollection<string> usernames)
     {
         Log.Information($"Start sending invites to organization {organizationName}. Invites count: {usernames.Count}");
 
         usernames = usernames.Select(u => u.ToLower()).ToList();
-        
-        HashSet<string> organizationUsers = await GetAlreadyAdded(organizationName);
-        HashSet<string> alreadyInvitedUsers = await GetAlreadyInvitedUsers(organizationName);
-        HashSet<string> expiredInvites = await GetExpiredInvites(organizationName);
 
-        (IReadOnlyCollection<string> addedUser, IReadOnlyCollection<string> notAddedUser) = usernames.SplitBy(s => organizationUsers.Contains(s));
-        if (addedUser.Any())
+        var inviteResults = new List<UserInviteResult>();
+
+        inviteResults.AddRange(await GetAlreadyAddedUsers(organizationName));
+        inviteResults.AddRange(await GetAlreadyInvitedUsers(organizationName));
+        inviteResults.AddRange(await GetExpiredInvites(organizationName));
+
+        if (inviteResults.Any(result => result.Result is UserInviteResultType.AlreadyAdded))
         {
-            Log.Information($"Skip {addedUser.Count} users that already added.");
-            Log.Debug($"Added users: " + string.Join(", ", addedUser));
+            IReadOnlyCollection<UserInviteResult> alreadyAdded = inviteResults
+                .Where(result => result.Result is UserInviteResultType.AlreadyAdded)
+                .ToList();
+
+            Log.Information($"Skip {alreadyAdded.Count} users that already added.");
+            Log.Debug("Added users: " + string.Join(", ", alreadyAdded));
         }
 
-        (IReadOnlyCollection<string> invited, IReadOnlyCollection<string> notInvited) = notAddedUser.SplitBy(u => alreadyInvitedUsers.Contains(u));
-        if (invited.Any())
+        if (inviteResults.Any(result => result.Result is UserInviteResultType.AlreadyInvited))
         {
-            Log.Information($"Skip {invited.Count} users that already invited.");
-            Log.Debug($"Invited users: " + string.Join(", ", invited));
+            IReadOnlyCollection<UserInviteResult> alreadyInvited = inviteResults
+                .Where(result => result.Result is UserInviteResultType.AlreadyInvited)
+                .ToList();
+
+            Log.Information($"Skip {alreadyInvited.Count} users that already invited.");
+            Log.Debug("Invited users: " + string.Join(", ", alreadyInvited));
         }
 
-        (IReadOnlyCollection<string>? expired, IReadOnlyCollection<string>? notExpired) = notInvited.SplitBy(u => expiredInvites.Contains(u));
-        if (expired.Any())
+        if (inviteResults.Any(result => result.Result is UserInviteResultType.InvitationExpired))
         {
-            Log.Information($"Skip {expired.Count} users that has already expired.");
-            Log.Debug($"Expired users: " + string.Join(", ", expired));
+            IReadOnlyCollection<UserInviteResult> invitationExpired = inviteResults
+                .Where(result => result.Result is UserInviteResultType.InvitationExpired)
+                .ToList();
+
+            Log.Information($"Skip {invitationExpired.Count} users that has already expired.");
+            Log.Debug("Expired users: " + string.Join(", ", invitationExpired));
         }
 
-        List<string> successInvites = new List<string>();
-        List<string> failedInvites = new List<string>();
-        Exception? exception = null;
+        var usersToInvite = new List<string>();
 
-        foreach (string username in notExpired)
+        foreach (UserInviteResult inviteResult in inviteResults)
         {
-            if (exception is not null)
+            if (usernames.Contains(inviteResult.Username))
+                continue;
+
+            usersToInvite.Add(inviteResult.Username);
+        }
+
+        Exception? forbiddenException = null;
+
+        foreach (string username in usersToInvite)
+        {
+            if (forbiddenException is not null)
             {
-                failedInvites.Add(username);
+                inviteResults.Add(new UserInviteResult(username, UserInviteResultType.Skipped, forbiddenException.Message));
                 continue;
             }
             
@@ -77,49 +95,50 @@ public class OrganizationInviteSender
 
             try
             {
-                await _client.Organization.Member.AddOrUpdateOrganizationMembership(organizationName, username, _addOrUpdateRequest);
-                successInvites.Add(username);
+                await _client.Organization.Member.AddOrUpdateOrganizationMembership(organizationName, username,
+                    _addOrUpdateRequest);
+                inviteResults.Add(new UserInviteResult(username, UserInviteResultType.Success, Reason: null));
                 Log.Debug($"User {username} invited successful");
             }
-            catch (Exception e)
+            catch (ForbiddenException ex)
             {
-                Log.Error($"Failed to invite user {username}. Other users will not invited.");
+                Log.Error("Invitation limit of 50 users per day has been reached. Other users will not be invited.");
 
-                exception = e;
-                failedInvites.Add(username);
+                forbiddenException = ex;
+                inviteResults.Add(new UserInviteResult(username, UserInviteResultType.Skipped, Reason: forbiddenException.Message));
+            }
+            catch (Exception ex)
+            {
+                Log.Error($"Failed to invite user {username}.");
+
+                inviteResults.Add(new UserInviteResult(username, UserInviteResultType.Failed, Reason: ex.Message));
             }
         }
 
-        return new InviteResult(
-            successInvites,
-            failedInvites,
-            addedUser,
-            invited,
-            expired,
-            exception);
+        return inviteResults;
     }
 
-    private async Task<HashSet<string>> GetAlreadyAdded(string organizationName)
+    private async Task<IReadOnlyCollection<UserInviteResult>> GetAlreadyAddedUsers(string organizationName)
     {
         IReadOnlyList<User> users = await _client.Organization.Member.GetAll(organizationName);
         return users
-            .Select(u => u.Login.ToLower())
-            .ToHashSet();
+            .Select(user => new UserInviteResult(user.Login.ToLower(), UserInviteResultType.AlreadyAdded, Reason: null))
+            .ToList();
     }
 
-    private async Task<HashSet<string>> GetAlreadyInvitedUsers(string organizationName)
+    private async Task<IReadOnlyCollection<UserInviteResult>> GetAlreadyInvitedUsers(string organizationName)
     {
         IReadOnlyList<OrganizationMembershipInvitation> users = await _client.Organization.Member.GetAllPendingInvitations(organizationName);
         return users
-            .Select(u => u.Login.ToLower())
-            .ToHashSet();
+            .Select(user => new UserInviteResult(user.Login.ToLower(), UserInviteResultType.AlreadyInvited, Reason: null))
+            .ToList();
     }
 
-    public async Task<HashSet<string>> GetExpiredInvites(string organizationName)
+    public async Task<IReadOnlyCollection<UserInviteResult>> GetExpiredInvites(string organizationName)
     {
         IReadOnlyList<OrganizationMembershipInvitation> failedInvitations = await _client.Organization.Member.GetAllFailedInvitations(organizationName);
         return failedInvitations
-            .Select(u => u.Login.ToLower())
-            .ToHashSet();
+            .Select(user => new UserInviteResult(user.Login.ToLower(), UserInviteResultType.InvitationExpired, Reason: null))
+            .ToList();
     }
 }
