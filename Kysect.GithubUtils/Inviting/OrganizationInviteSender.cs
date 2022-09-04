@@ -1,5 +1,4 @@
-﻿using Kysect.GithubUtils.Tools.Extensions;
-using Octokit;
+﻿using Octokit;
 using Serilog;
 
 namespace Kysect.GithubUtils;
@@ -30,41 +29,61 @@ public class OrganizationInviteSender
     /// <summary>
     /// Github has limit 50 invites per day. So method call will fail after this limit.
     /// </summary>
-    public async Task<InviteResult> Invite(string organizationName, IReadOnlyCollection<string> usernames)
+    public async Task<IReadOnlyCollection<UserInviteResult>> Invite(string organizationName, IReadOnlyCollection<string> usernames)
     {
         Log.Information($"Start sending invites to organization {organizationName}. Invites count: {usernames.Count}");
 
         usernames = usernames.Select(u => u.ToLower()).ToList();
-        
-        HashSet<string> organizationUsers = await GetAlreadyAddedUsers(organizationName);
-        HashSet<string> alreadyInvitedUsers = await GetAlreadyInvitedUsers(organizationName);
-        HashSet<string> expiredInvites = await GetExpiredInvites(organizationName);
-
-        (IReadOnlyCollection<string> addedUser, IReadOnlyCollection<string> notAddedUser) = usernames.SplitBy(s => organizationUsers.Contains(s));
-        if (addedUser.Any())
-        {
-            Log.Information($"Skip {addedUser.Count} users that already added.");
-            Log.Debug($"Added users: " + string.Join(", ", addedUser));
-        }
-
-        (IReadOnlyCollection<string> invited, IReadOnlyCollection<string> notInvited) = notAddedUser.SplitBy(u => alreadyInvitedUsers.Contains(u));
-        if (invited.Any())
-        {
-            Log.Information($"Skip {invited.Count} users that already invited.");
-            Log.Debug($"Invited users: " + string.Join(", ", invited));
-        }
-
-        (IReadOnlyCollection<string>? expired, IReadOnlyCollection<string>? notExpired) = notInvited.SplitBy(u => expiredInvites.Contains(u));
-        if (expired.Any())
-        {
-            Log.Information($"Skip {expired.Count} users that has already expired.");
-            Log.Debug($"Expired users: " + string.Join(", ", expired));
-        }
 
         var inviteResults = new List<UserInviteResult>();
+
+        inviteResults.AddRange(await GetAlreadyAddedUsers(organizationName));
+        inviteResults.AddRange(await GetAlreadyInvitedUsers(organizationName));
+        inviteResults.AddRange(await GetExpiredInvites(organizationName));
+
+        if (inviteResults.Any(result => result.Result is UserInviteResultType.AlreadyAdded))
+        {
+            IReadOnlyCollection<UserInviteResult> alreadyAdded = inviteResults
+                .Where(result => result.Result is UserInviteResultType.AlreadyAdded)
+                .ToList();
+
+            Log.Information($"Skip {alreadyAdded.Count} users that already added.");
+            Log.Debug("Added users: " + string.Join(", ", alreadyAdded));
+        }
+
+        if (inviteResults.Any(result => result.Result is UserInviteResultType.AlreadyInvited))
+        {
+            IReadOnlyCollection<UserInviteResult> alreadyInvited = inviteResults
+                .Where(result => result.Result is UserInviteResultType.AlreadyInvited)
+                .ToList();
+
+            Log.Information($"Skip {alreadyInvited.Count} users that already invited.");
+            Log.Debug("Invited users: " + string.Join(", ", alreadyInvited));
+        }
+
+        if (inviteResults.Any(result => result.Result is UserInviteResultType.InvitationExpired))
+        {
+            IReadOnlyCollection<UserInviteResult> invitationExpired = inviteResults
+                .Where(result => result.Result is UserInviteResultType.InvitationExpired)
+                .ToList();
+
+            Log.Information($"Skip {invitationExpired.Count} users that has already expired.");
+            Log.Debug("Expired users: " + string.Join(", ", invitationExpired));
+        }
+
+        var usersToInvite = new List<string>();
+
+        foreach (UserInviteResult inviteResult in inviteResults)
+        {
+            if (usernames.Contains(inviteResult.Username))
+                continue;
+
+            usersToInvite.Add(inviteResult.Username);
+        }
+
         Exception? forbiddenException = null;
 
-        foreach (string username in notExpired)
+        foreach (string username in usersToInvite)
         {
             if (forbiddenException is not null)
             {
@@ -86,7 +105,7 @@ public class OrganizationInviteSender
                 Log.Error("Invitation limit of 50 users per day has been reached. Other users will not be invited.");
 
                 forbiddenException = ex;
-                inviteResults.Add(new UserInviteResult(username, UserInviteResultType.Skipped, Reason: ex.Message));
+                inviteResults.Add(new UserInviteResult(username, UserInviteResultType.Skipped, Reason: forbiddenException.Message));
             }
             catch (Exception ex)
             {
@@ -96,30 +115,30 @@ public class OrganizationInviteSender
             }
         }
 
-        return new InviteResult(inviteResults, addedUser, invited, expired, forbiddenException);
+        return inviteResults;
     }
 
-    private async Task<HashSet<string>> GetAlreadyAddedUsers(string organizationName)
+    private async Task<IReadOnlyCollection<UserInviteResult>> GetAlreadyAddedUsers(string organizationName)
     {
         IReadOnlyList<User> users = await _client.Organization.Member.GetAll(organizationName);
         return users
-            .Select(u => u.Login.ToLower())
-            .ToHashSet();
+            .Select(user => new UserInviteResult(user.Login.ToLower(), UserInviteResultType.AlreadyAdded, Reason: null))
+            .ToList();
     }
 
-    private async Task<HashSet<string>> GetAlreadyInvitedUsers(string organizationName)
+    private async Task<IReadOnlyCollection<UserInviteResult>> GetAlreadyInvitedUsers(string organizationName)
     {
         IReadOnlyList<OrganizationMembershipInvitation> users = await _client.Organization.Member.GetAllPendingInvitations(organizationName);
         return users
-            .Select(u => u.Login.ToLower())
-            .ToHashSet();
+            .Select(user => new UserInviteResult(user.Login.ToLower(), UserInviteResultType.AlreadyInvited, Reason: null))
+            .ToList();
     }
 
-    public async Task<HashSet<string>> GetExpiredInvites(string organizationName)
+    public async Task<IReadOnlyCollection<UserInviteResult>> GetExpiredInvites(string organizationName)
     {
         IReadOnlyList<OrganizationMembershipInvitation> failedInvitations = await _client.Organization.Member.GetAllFailedInvitations(organizationName);
         return failedInvitations
-            .Select(u => u.Login.ToLower())
-            .ToHashSet();
+            .Select(user => new UserInviteResult(user.Login.ToLower(), UserInviteResultType.InvitationExpired, Reason: null))
+            .ToList();
     }
 }
