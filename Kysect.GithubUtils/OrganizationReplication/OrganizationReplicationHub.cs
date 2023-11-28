@@ -1,7 +1,7 @@
 ﻿using Kysect.CommonLib.Collections.Extensions;
-using Kysect.GithubUtils.Models;
 using Kysect.GithubUtils.RepositoryDiscovering;
 using Kysect.GithubUtils.RepositorySync;
+using Kysect.GithubUtils.RepositorySync.Models;
 using Microsoft.Extensions.Logging;
 
 namespace Kysect.GithubUtils.OrganizationReplication;

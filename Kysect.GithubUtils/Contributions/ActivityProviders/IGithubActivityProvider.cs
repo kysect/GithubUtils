@@ -1,4 +1,4 @@
-﻿namespace Kysect.GithubUtils;
+﻿namespace Kysect.GithubUtils.Contributions;
 
 public interface IGithubActivityProvider
 {

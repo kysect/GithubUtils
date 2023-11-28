@@ -1,4 +1,4 @@
-﻿namespace Kysect.GithubUtils.Models;
+﻿namespace Kysect.GithubUtils.RepositorySync.Models;
 
 public readonly record struct GithubRepository(string Owner, string Name)
 {

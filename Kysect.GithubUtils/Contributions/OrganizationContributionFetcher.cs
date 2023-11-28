@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using Octokit;
 
-namespace Kysect.GithubUtils.OrganizationContributions;
+namespace Kysect.GithubUtils.Contributions;
 
 public class OrganizationContributionFetcher
 {

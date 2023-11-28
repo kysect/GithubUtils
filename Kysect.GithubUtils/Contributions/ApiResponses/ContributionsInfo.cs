@@ -1,9 +1,9 @@
 ﻿using System.Globalization;
 
-namespace Kysect.GithubUtils
+namespace Kysect.GithubUtils.Contributions
 {
     public class ContributionsInfo
-    { 
+    {
         public DateTime Date { get; set; }
         public int Count { get; set; }
 

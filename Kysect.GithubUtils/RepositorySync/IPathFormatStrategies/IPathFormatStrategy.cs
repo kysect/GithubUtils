@@ -1,5 +1,5 @@
 ﻿using Kysect.CommonLib.BaseTypes.Extensions;
-using Kysect.GithubUtils.Models;
+using Kysect.GithubUtils.RepositorySync.Models;
 
 namespace Kysect.GithubUtils.RepositorySync;
 

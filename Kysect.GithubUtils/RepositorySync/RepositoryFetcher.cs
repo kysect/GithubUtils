@@ -1,5 +1,5 @@
-﻿using Kysect.GithubUtils.Models;
-using Kysect.GithubUtils.OrganizationReplication;
+﻿using Kysect.GithubUtils.OrganizationReplication;
+using Kysect.GithubUtils.RepositorySync.Models;
 using LibGit2Sharp;
 using Microsoft.Extensions.Logging;
 

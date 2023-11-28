@@ -1,4 +1,4 @@
-﻿namespace Kysect.GithubUtils
+﻿namespace Kysect.GithubUtils.Contributions
 {
     public class ActivityInfo
     {
@@ -9,7 +9,7 @@
         public List<ContributionsInfo> PerMonthActivity()
         {
             return Contributions
-                .GroupBy(c => c.Date.Month.ToString()+ "." + c.Date.Year.ToString())
+                .GroupBy(c => c.Date.Month.ToString() + "." + c.Date.Year.ToString())
                 .Select(c => new ContributionsInfo(c.Key, c.Sum(_ => _.Count)))
                 .ToList();
         }
