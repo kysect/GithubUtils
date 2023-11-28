@@ -1,9 +1,8 @@
-﻿using Kysect.CommonLib;
-using Kysect.CommonLib.Collections.Extensions;
+﻿using Kysect.CommonLib.Collections.Extensions;
 using Kysect.GithubUtils.Models;
 using Kysect.GithubUtils.RepositoryDiscovering;
 using Kysect.GithubUtils.RepositorySync;
-using Serilog;
+using Microsoft.Extensions.Logging;
 
 namespace Kysect.GithubUtils.OrganizationReplication;
 
@@ -11,11 +10,13 @@ public class OrganizationReplicationHub
 {
     private readonly IOrganizationReplicatorPathFormatter _pathFormatter;
     private readonly RepositoryFetcher _repositoryFetcher;
+    private readonly ILogger _logger;
 
-    public OrganizationReplicationHub(IOrganizationReplicatorPathFormatter pathFormatter, RepositoryFetcher repositoryFetcher)
+    public OrganizationReplicationHub(IOrganizationReplicatorPathFormatter pathFormatter, RepositoryFetcher repositoryFetcher, ILogger logger)
     {
         _pathFormatter = pathFormatter;
         _repositoryFetcher = repositoryFetcher;
+        _logger = logger;
     }
 
     public bool TryAddOrganization(string organizationName)
@@ -23,7 +24,7 @@ public class OrganizationReplicationHub
         string organizationDirectoryPath = _pathFormatter.GetPathToOrganization(organizationName);
         if (Directory.Exists(organizationDirectoryPath))
         {
-            Log.Debug($"Organization {organizationName} already added to hub.");
+            _logger.LogDebug($"Organization {organizationName} already added to hub.");
             return false;
         }
 
@@ -64,16 +65,16 @@ public class OrganizationReplicationHub
         if (useMasterBranch)
         {
             IReadOnlyCollection<GithubRepository> rootBranchRepos = GetRepositories(organizationName);
-            Log.Debug($"Found {rootBranchRepos.Count} repositories form root branch.");
-            Log.Verbose($"Repositories: {rootBranchRepos.ToSingleString()}");
+            _logger.LogDebug($"Found {rootBranchRepos.Count} repositories form root branch.");
+            _logger.LogTrace($"Repositories: {rootBranchRepos.ToSingleString()}");
             result.AddRange(rootBranchRepos);
         }
 
         foreach (string branch in branches)
         {
             IReadOnlyCollection<GithubRepository> branchRepositories = GetRepositories(organizationName, branch);
-            Log.Debug($"Found {branchRepositories.Count} repositories form branch {branch}.");
-            Log.Verbose($"Repositories: {branchRepositories.ToSingleString()}");
+            _logger.LogDebug($"Found {branchRepositories.Count} repositories form branch {branch}.");
+            _logger.LogTrace($"Repositories: {branchRepositories.ToSingleString()}");
             result.AddRange(branchRepositories);
         }
 
@@ -82,11 +83,11 @@ public class OrganizationReplicationHub
 
     public void SyncOrganizations(IRepositoryDiscoveryService discoveryService)
     {
-        var organizationFetcher = new OrganizationFetcher(discoveryService, _repositoryFetcher, _pathFormatter);
+        var organizationFetcher = new OrganizationFetcher(discoveryService, _repositoryFetcher, _pathFormatter, _logger);
         IReadOnlyCollection<string> organizationNames = GetOrganizationNames();
 
-        Log.Debug($"Start organization sync. Organization count: {organizationNames.Count}");
-        Log.Verbose($"Organization list: {organizationNames.ToSingleString()}");
+        _logger.LogDebug($"Start organization sync. Organization count: {organizationNames.Count}");
+        _logger.LogTrace($"Organization list: {organizationNames.ToSingleString()}");
 
         foreach (string organizationName in organizationNames)
         {
@@ -96,11 +97,11 @@ public class OrganizationReplicationHub
 
     public void SyncOrganizations(IRepositoryDiscoveryService discoveryService, string branch)
     {
-        var organizationFetcher = new OrganizationFetcher(discoveryService, _repositoryFetcher, _pathFormatter);
+        var organizationFetcher = new OrganizationFetcher(discoveryService, _repositoryFetcher, _pathFormatter, _logger);
         IReadOnlyCollection<string> organizationNames = GetOrganizationNames();
 
-        Log.Debug($"Start organization sync for branch {branch}. Organization count: {organizationNames.Count}");
-        Log.Verbose($"Organization list: {organizationNames.ToSingleString()}");
+        _logger.LogDebug($"Start organization sync for branch {branch}. Organization count: {organizationNames.Count}");
+        _logger.LogTrace($"Organization list: {organizationNames.ToSingleString()}");
 
         foreach (string organizationName in organizationNames)
         {

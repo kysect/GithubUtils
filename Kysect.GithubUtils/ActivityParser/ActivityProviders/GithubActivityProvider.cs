@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Text.Json;
-using Serilog;
+using Microsoft.Extensions.Logging;
 
 namespace Kysect.GithubUtils
 {
@@ -11,9 +11,11 @@ namespace Kysect.GithubUtils
         private readonly HttpClient _client;
         private readonly bool _isParallel;
         private readonly bool _withRetry;
+        private readonly ILogger _logger;
 
-        public GithubActivityProvider(bool isParallel = true, bool withRetry = false)
+        public GithubActivityProvider(ILogger logger, bool isParallel = true, bool withRetry = false)
         {
+            _logger = logger;
             _isParallel = isParallel;
             _withRetry = withRetry;
             _client = new HttpClient();
@@ -21,14 +23,14 @@ namespace Kysect.GithubUtils
 
         public Dictionary<string, ActivityInfo> GetActivityInfo(IReadOnlyCollection<string> usernames, DateTime? from = null, DateTime? to = null)
         {
-            Log.Information($"Start getting activity for users. Users count: {usernames.Count}, Parallel: {_isParallel}, With retry: {_withRetry}");
+            _logger.LogInformation($"Start getting activity for users. Users count: {usernames.Count}, Parallel: {_isParallel}, With retry: {_withRetry}");
 
             if (_isParallel)
             {
-                Log.Debug("Use parallel processing for getting activity info.");
+                _logger.LogDebug("Use parallel processing for getting activity info.");
                 if (_withRetry)
                 {
-                    Log.Debug("Use retry processing for getting activity info.");
+                    _logger.LogDebug("Use retry processing for getting activity info.");
                     return GetInfoWithRetry(usernames, from, to);
                 }
 
@@ -45,7 +47,7 @@ namespace Kysect.GithubUtils
 
         private async Task<ActivityInfo> GetActivityInfo(string username, DateTime? from = null, DateTime? to = null)
         {
-            Log.Debug($"Request activity for {username}, from: {from?.ToShortDateString()}, to {to?.ToShortDateString()}");
+            _logger.LogDebug($"Request activity for {username}, from: {from?.ToShortDateString()}, to {to?.ToShortDateString()}");
 
             string response = await _client.GetStringAsync(Url + username);
             var activityInfo = JsonSerializer.Deserialize<ActivityInfo>(response, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
