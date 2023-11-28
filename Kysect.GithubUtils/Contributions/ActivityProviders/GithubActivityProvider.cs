@@ -2,7 +2,7 @@
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 
-namespace Kysect.GithubUtils
+namespace Kysect.GithubUtils.Contributions
 {
     public class GithubActivityProvider : IGithubActivityProvider
     {

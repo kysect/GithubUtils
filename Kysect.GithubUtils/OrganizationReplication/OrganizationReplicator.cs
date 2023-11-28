@@ -1,5 +1,5 @@
-﻿using Kysect.GithubUtils.Models;
-using Kysect.GithubUtils.RepositorySync;
+﻿using Kysect.GithubUtils.RepositorySync;
+using Kysect.GithubUtils.RepositorySync.Models;
 
 namespace Kysect.GithubUtils.OrganizationReplication;
 

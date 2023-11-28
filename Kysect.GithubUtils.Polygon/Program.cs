@@ -1,10 +1,9 @@
 using System.Text.Json;
 using Kysect.CommonLib.DependencyInjection;
-using Kysect.GithubUtils;
-using Kysect.GithubUtils.Models;
-using Kysect.GithubUtils.OrganizationContributions;
+using Kysect.GithubUtils.Contributions;
 using Kysect.GithubUtils.OrganizationReplication;
 using Kysect.GithubUtils.RepositorySync;
+using Kysect.GithubUtils.RepositorySync.Models;
 using Octokit;
 
 var logger = PredefinedLogger.CreateConsoleLogger();
