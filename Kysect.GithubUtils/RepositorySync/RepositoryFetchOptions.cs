@@ -12,10 +12,6 @@ public class RepositoryFetchOptions
 
     public RepositoryFetchOptions(bool ignoreMissedBranch, CheckoutOptions checkoutOptions, FetchOptions fetchOptions, CloneOptions cloneOptions)
     {
-        ArgumentNullException.ThrowIfNull(checkoutOptions);
-        ArgumentNullException.ThrowIfNull(fetchOptions);
-        ArgumentNullException.ThrowIfNull(cloneOptions);
-
         IgnoreMissedBranch = ignoreMissedBranch;
         CheckoutOptions = checkoutOptions;
         FetchOptions = fetchOptions;
@@ -24,9 +20,6 @@ public class RepositoryFetchOptions
 
     public RepositoryFetchOptions(string gitUser, string token, bool ignoreMissedBranch = false)
     {
-        ArgumentNullException.ThrowIfNull(gitUser);
-        ArgumentNullException.ThrowIfNull(token);
-
         IgnoreMissedBranch = ignoreMissedBranch;
         CheckoutOptions = CreateDefaultCheckoutOptions();
         FetchOptions = CreateDefaultFetchOptions(gitUser, token);

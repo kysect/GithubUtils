@@ -104,7 +104,7 @@ public class RepositoryDiscoveryIntegrationTests
         Assert.NotNull(repos);
         CollectionAssert.IsNotEmpty(repos);
         // Also checking that pagination is working (pageSize = 100)
-        Assert.Greater(repos.Count, 100);
+        Assert.Greater(repos.Count(), 100);
         Assert.NotNull(repos.FirstOrDefault(repo => repo.Name == expectedRepoName),
             "Expected template repository was not found");
     }

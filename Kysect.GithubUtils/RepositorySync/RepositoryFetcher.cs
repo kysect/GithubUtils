@@ -11,8 +11,6 @@ public class RepositoryFetcher
 
     public RepositoryFetcher(RepositoryFetchOptions fetchOptions)
     {
-        ArgumentNullException.ThrowIfNull(fetchOptions);
-
         _fetchOptions = fetchOptions;
     }
 
@@ -48,8 +46,6 @@ public class RepositoryFetcher
 
     public string Checkout(IPathFormatStrategy pathFormatter, GithubRepositoryBranch repositoryWithBranch)
     {
-        ArgumentNullException.ThrowIfNull(pathFormatter);
-
         Log.Debug($"Checkout branch: {repositoryWithBranch}");
         string targetPath = pathFormatter.GetPathToRepositoryWithBranch(repositoryWithBranch);
         Log.Debug($"Branch for {repositoryWithBranch}: {targetPath}");
