@@ -11,18 +11,11 @@ public class UseOwnerForFolderNameStrategy : IPathFormatStrategy
 
     public string GetPathToRepository(string organization, string repository)
     {
-        ArgumentNullException.ThrowIfNull(organization);
-        ArgumentNullException.ThrowIfNull(repository);
-
-        return Path.Combine(_rootPath, IPathFormatStrategy.MainDirectory, organization);
+        return Path.Combine(_rootPath, PathFormatStrategyConstant.MainDirectory, organization);
     }
 
     public string GetPathToRepositoryWithBranch(string organization, string branch, string repository)
     {
-        ArgumentNullException.ThrowIfNull(organization);
-        ArgumentNullException.ThrowIfNull(branch);
-        ArgumentNullException.ThrowIfNull(repository);
-
-        return Path.Combine(_rootPath, IPathFormatStrategy.CustomBranchDirectory, branch, organization);
+        return Path.Combine(_rootPath, PathFormatStrategyConstant.CustomBranchDirectory, branch, organization);
     }
 }
