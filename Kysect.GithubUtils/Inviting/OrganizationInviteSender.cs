@@ -73,12 +73,13 @@ public class OrganizationInviteSender
 
         var usersToInvite = new List<string>();
 
-        foreach (UserInviteResult inviteResult in inviteResults)
+
+        foreach (string username in usernames)
         {
-            if (usernames.Contains(inviteResult.Username))
+            if (inviteResults.Any(i => string.Equals(i.Username, username, StringComparison.InvariantCultureIgnoreCase)))
                 continue;
 
-            usersToInvite.Add(inviteResult.Username);
+            usersToInvite.Add(username);
         }
 
         Exception? forbiddenException = null;
