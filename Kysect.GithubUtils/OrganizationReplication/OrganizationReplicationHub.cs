@@ -1,4 +1,5 @@
 ﻿using Kysect.CommonLib;
+using Kysect.CommonLib.Collections.Extensions;
 using Kysect.GithubUtils.Models;
 using Kysect.GithubUtils.RepositoryDiscovering;
 using Kysect.GithubUtils.RepositorySync;
@@ -13,16 +14,12 @@ public class OrganizationReplicationHub
 
     public OrganizationReplicationHub(IOrganizationReplicatorPathFormatter pathFormatter, RepositoryFetcher repositoryFetcher)
     {
-        ArgumentNullException.ThrowIfNull(pathFormatter);
-
         _pathFormatter = pathFormatter;
         _repositoryFetcher = repositoryFetcher;
     }
 
     public bool TryAddOrganization(string organizationName)
     {
-        ArgumentNullException.ThrowIfNull(organizationName);
-
         string organizationDirectoryPath = _pathFormatter.GetPathToOrganization(organizationName);
         if (Directory.Exists(organizationDirectoryPath))
         {
@@ -43,8 +40,6 @@ public class OrganizationReplicationHub
 
     public IReadOnlyCollection<GithubRepository> GetRepositories(string organizationName)
     {
-        ArgumentNullException.ThrowIfNull(organizationName);
-
         string pathToOrganization = _pathFormatter.GetPathToOrganization(organizationName);
         Directory.CreateDirectory(pathToOrganization);
         return Directory
@@ -55,9 +50,6 @@ public class OrganizationReplicationHub
 
     public IReadOnlyCollection<GithubRepository> GetRepositories(string organizationName, string branch)
     {
-        ArgumentNullException.ThrowIfNull(organizationName);
-        ArgumentNullException.ThrowIfNull(branch);
-
         string pathToOrganization = _pathFormatter.GetPathToOrganizationWithBranch(organizationName, branch);
         Directory.CreateDirectory(pathToOrganization);
         return Directory
@@ -68,9 +60,6 @@ public class OrganizationReplicationHub
 
     public IReadOnlyCollection<GithubRepository> GetRepositories(string organizationName, bool useMasterBranch, params string[] branches)
     {
-        ArgumentNullException.ThrowIfNull(organizationName);
-        ArgumentNullException.ThrowIfNull(branches);
-
         var result = new List<GithubRepository>();
         if (useMasterBranch)
         {
