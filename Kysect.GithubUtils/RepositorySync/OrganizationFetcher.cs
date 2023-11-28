@@ -1,6 +1,6 @@
 ﻿using Kysect.GithubUtils.Models;
 using Kysect.GithubUtils.RepositoryDiscovering;
-using Serilog;
+using Microsoft.Extensions.Logging;
 
 namespace Kysect.GithubUtils.RepositorySync;
 
@@ -11,24 +11,26 @@ public class OrganizationFetcher
     private readonly RepositoryFetcher _repositoryFetcher;
     private readonly IPathFormatStrategy _pathFormatter;
     private readonly IRepositoryDiscoveryService _discoveryService;
+    private readonly ILogger _logger;
 
-    public OrganizationFetcher(IRepositoryDiscoveryService discoveryService, RepositoryFetcher repositoryFetcher, IPathFormatStrategy pathFormatter, bool useParallelProcessing = true)
+    public OrganizationFetcher(IRepositoryDiscoveryService discoveryService, RepositoryFetcher repositoryFetcher, IPathFormatStrategy pathFormatter, ILogger logger, bool useParallelProcessing = true)
     {
         _discoveryService = discoveryService;
         _repositoryFetcher = repositoryFetcher;
         _pathFormatter = pathFormatter;
+        _logger = logger;
         _useParallelProcessing = useParallelProcessing;
     }
 
     public IReadOnlyCollection<GithubOrganizationRepository> Fetch(string organizationName, string? branch = null)
     {
-        Log.Information($"Start discovering repositories from {organizationName}");
+        _logger.LogInformation($"Start discovering repositories from {organizationName}");
         List<RepositoryRecord> repositoryRecords = GetRepositoryList(_discoveryService, organizationName).Result;
-        Log.Information($"Discovered {repositoryRecords.Count} repositories");
+        _logger.LogInformation($"Discovered {repositoryRecords.Count} repositories");
 
         if (_useParallelProcessing)
         {
-            Log.Information("Start parallel processing");
+            _logger.LogInformation("Start parallel processing");
 
             List<GithubOrganizationRepository> result = repositoryRecords
                 .AsParallel()
@@ -39,7 +41,7 @@ public class OrganizationFetcher
         }
         else
         {
-            Log.Information("Start single thread processing");
+            _logger.LogInformation("Start single thread processing");
 
             List<GithubOrganizationRepository> result = repositoryRecords
                 .Select(r => SyncRepository(r, organizationName, branch))
