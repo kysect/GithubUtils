@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<RepositoryUrl>https://github.com/kysect/GithubUtils</RepositoryUrl>
+		<Company>Kysect</Company>
+		<Authors>Kysect</Authors>
+		<Version>1.1.0</Version>
+		<LangVersion>latest</LangVersion>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="IsExternalInit" >
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Kysect.CommonLib" />
+		<PackageReference Include="LibGit2Sharp" />
+		<PackageReference Include="Octokit" />
+		<PackageReference Include="System.Text.Json" />
+	</ItemGroup>
+
+</Project>
