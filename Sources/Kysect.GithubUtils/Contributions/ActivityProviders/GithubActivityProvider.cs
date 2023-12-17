@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using Kysect.CommonLib.BaseTypes.Extensions;
+using System.Diagnostics;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 
@@ -52,6 +53,7 @@ namespace Kysect.GithubUtils.Contributions
             string response = await _client.GetStringAsync(Url + username);
             var activityInfo = JsonSerializer.Deserialize<ActivityInfo>(response, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
+            activityInfo.ThrowIfNull();
             //TODO: fix nullability
             return activityInfo.FilterValues(from, to);
         }
