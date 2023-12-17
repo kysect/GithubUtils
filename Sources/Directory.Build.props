@@ -6,5 +6,12 @@
 		<LangVersion>latest</LangVersion>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<UseArtifactsOutput>true</UseArtifactsOutput>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<DebugType>portable</DebugType>
+		<IncludeSymbols>true</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 	</PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="Kysect.Editorconfig" />
+	</ItemGroup>
 </Project>
