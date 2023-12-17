@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using Kysect.CommonLib.BaseTypes.Extensions;
+using System.Net;
 using System.Text.Json;
 
 namespace Kysect.GithubUtils.RepositoryDiscovering;
@@ -29,7 +30,7 @@ internal static class HttpResponseMessageExtensions
 
         try
         {
-            return JsonSerializer.Deserialize<TResponse>(content);
+            return JsonSerializer.Deserialize<TResponse>(content).ThrowIfNull();
         }
         catch (Exception e)
         {

@@ -48,7 +48,7 @@ public class RepositoryDiscoveryIntegrationTests
             _discoveryService = new GitHubRepositoryDiscoveryService(string.Empty);
         });
 
-        Assert.NotNull(exception?.InnerException);
+        Assert.NotNull(exception.InnerException);
         Assert.IsInstanceOf<ArgumentException>(exception.InnerException);
     }
 
@@ -61,7 +61,7 @@ public class RepositoryDiscoveryIntegrationTests
             await _discoveryService.TryDiscover(string.Empty).ToListAsync();
         });
 
-        Assert.NotNull(exception?.InnerException);
+        Assert.NotNull(exception.InnerException);
         Assert.IsInstanceOf<ArgumentException>(exception.InnerException);
     }
 
@@ -79,7 +79,7 @@ public class RepositoryDiscoveryIntegrationTests
         Assert.NotNull(exception);
         Assert.IsTrue(exception.Message.Contains("Invalid token"), "Not excepted exception was handled");
     }
-    
+
     [TestCase("that-organization-should-not-exist")]
     public void ShouldHandleOrganizationNotFoundScenario_ThrowsRuntimeException(string org)
     {
