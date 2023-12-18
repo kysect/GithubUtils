@@ -26,10 +26,11 @@ public class DemoScenarios
         var gitUser = string.Empty;
         var token = string.Empty;
         var repositoryFetcher = new RepositoryFetcher(new RepositoryFetchOptions(gitUser, token), _logger);
-        var githubRepository = new GithubRepository("fredikats", "test");
-        repositoryFetcher.EnsureRepositoryUpdated(new UseOwnerAndRepoForFolderNameStrategy("repo"), githubRepository);
-        repositoryFetcher.Checkout(new UseOwnerAndRepoForFolderNameStrategy("repo"), new GithubRepositoryBranch(githubRepository, "main"));
-        repositoryFetcher.Checkout(new UseOwnerAndRepoForFolderNameStrategy("repo"), new GithubRepositoryBranch(githubRepository, "qq"));
+        var githubRepository = new GithubRepository("kysect", "GithubUtils");
+        ILocalStoragePathFactory localStoragePathFactory = new UseOwnerAndRepoForFolderNameStrategy("repo");
+
+        repositoryFetcher.EnsureRepositoryUpdated(localStoragePathFactory, githubRepository);
+        repositoryFetcher.Checkout(localStoragePathFactory, new GithubRepositoryBranch(githubRepository, "master"));
     }
 
     public void CheckStatParser()

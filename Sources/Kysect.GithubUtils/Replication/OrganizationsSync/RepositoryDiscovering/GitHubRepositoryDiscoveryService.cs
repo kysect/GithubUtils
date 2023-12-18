@@ -15,13 +15,13 @@ public sealed class GitHubRepositoryDiscoveryService : IRepositoryDiscoveryServi
         _gitHubClient = gitHubClient.ThrowIfNull();
     }
 
-    public async Task<IReadOnlyList<GithubRepository>> GetRepositories(string organization)
+    public async Task<IReadOnlyList<GithubRepositoryBranch>> GetRepositories(string organization)
     {
         // TODO: support getting for User also
         IReadOnlyList<Repository> repositories = await _gitHubClient.Repository.GetAllForOrg(organization, new ApiOptions { PageSize = PageSize });
 
         return repositories
-            .Select(r => new GithubRepository(r.Owner.Name, r.Name))
+            .Select(r => new GithubRepositoryBranch(r.Owner.Name, r.Name, r.DefaultBranch))
             .ToList();
     }
 }

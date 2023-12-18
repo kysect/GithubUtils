@@ -27,8 +27,15 @@ public class OrganizationFetcher
     public IReadOnlyCollection<ClonedGithubRepository> Fetch(string organizationName, string? branch = null)
     {
         _logger.LogInformation($"Start discovering repositories from {organizationName}");
-        IReadOnlyCollection<GithubRepository> repositoryRecords = _discoveryService.GetRepositories(organizationName).Result;
+        IReadOnlyCollection<GithubRepositoryBranch> repositoryRecords = _discoveryService.GetRepositories(organizationName).Result;
         _logger.LogInformation($"Discovered {repositoryRecords.Count} repositories");
+
+        if (branch is not null)
+        {
+            repositoryRecords = repositoryRecords
+                .Select(r => r with { Branch = branch })
+                .ToList();
+        }
 
         if (_useParallelProcessing)
         {
@@ -36,7 +43,7 @@ public class OrganizationFetcher
 
             var result = repositoryRecords
                 .AsParallel()
-                .Select(r => SyncRepository(r, branch))
+                .Select(r => SyncRepository(r))
                 .ToList();
 
             return result;
@@ -46,23 +53,16 @@ public class OrganizationFetcher
             _logger.LogInformation("Start single thread processing");
 
             List<ClonedGithubRepository> result = repositoryRecords
-                .Select(r => SyncRepository(r, branch))
+                .Select(r => SyncRepository(r))
                 .ToList();
 
             return result;
         }
     }
 
-    private ClonedGithubRepository SyncRepository(GithubRepository githubRepository, string? branch)
+    private ClonedGithubRepository SyncRepository(GithubRepositoryBranch githubRepository, bool directoryPerBranch = false)
     {
-        string path = _repositoryFetcher.EnsureRepositoryUpdated(_pathFormatter, githubRepository);
-
-        if (branch is not null)
-        {
-            var githubRepositoryBranch = new GithubRepositoryBranch(githubRepository.Owner, githubRepository.Name, branch);
-            _repositoryFetcher.Checkout(_pathFormatter, githubRepositoryBranch);
-        }
-
+        string path = _repositoryFetcher.Checkout(_pathFormatter, githubRepository, directoryPerBranch);
         return new ClonedGithubRepository(path, githubRepository.Owner, githubRepository.Name);
     }
 }
