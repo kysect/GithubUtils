@@ -1,7 +1,7 @@
 ﻿using LibGit2Sharp;
 using LibGit2Sharp.Handlers;
 
-namespace Kysect.GithubUtils.RepositorySync;
+namespace Kysect.GithubUtils.Replication.RepositorySync;
 
 public class RepositoryFetchOptions
 {

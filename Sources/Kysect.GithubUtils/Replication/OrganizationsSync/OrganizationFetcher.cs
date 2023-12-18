@@ -1,10 +1,10 @@
 ﻿using Kysect.GithubUtils.Models;
-using Kysect.GithubUtils.RepositoryDiscovering;
-using Kysect.GithubUtils.RepositoryDiscovering.Models;
-using Kysect.GithubUtils.RepositorySync.LocalStoragePathFactories;
+using Kysect.GithubUtils.Replication.OrganizationsSync.RepositoryDiscovering;
+using Kysect.GithubUtils.Replication.RepositorySync;
+using Kysect.GithubUtils.Replication.RepositorySync.LocalStoragePathFactories;
 using Microsoft.Extensions.Logging;
 
-namespace Kysect.GithubUtils.RepositorySync;
+namespace Kysect.GithubUtils.Replication.OrganizationsSync;
 
 public class OrganizationFetcher
 {
@@ -24,7 +24,7 @@ public class OrganizationFetcher
         _useParallelProcessing = useParallelProcessing;
     }
 
-    public IReadOnlyCollection<GithubOrganizationRepository> Fetch(string organizationName, string? branch = null)
+    public IReadOnlyCollection<ClonedGithubRepository> Fetch(string organizationName, string? branch = null)
     {
         _logger.LogInformation($"Start discovering repositories from {organizationName}");
         List<RepositoryRecord> repositoryRecords = GetRepositoryList(_discoveryService, organizationName).Result;
@@ -34,7 +34,7 @@ public class OrganizationFetcher
         {
             _logger.LogInformation("Start parallel processing");
 
-            List<GithubOrganizationRepository> result = repositoryRecords
+            var result = repositoryRecords
                 .AsParallel()
                 .Select(r => SyncRepository(r, organizationName, branch))
                 .ToList();
@@ -45,7 +45,7 @@ public class OrganizationFetcher
         {
             _logger.LogInformation("Start single thread processing");
 
-            List<GithubOrganizationRepository> result = repositoryRecords
+            var result = repositoryRecords
                 .Select(r => SyncRepository(r, organizationName, branch))
                 .ToList();
 
@@ -53,7 +53,7 @@ public class OrganizationFetcher
         }
     }
 
-    private GithubOrganizationRepository SyncRepository(RepositoryRecord repository, string organizationName, string? branch)
+    private ClonedGithubRepository SyncRepository(RepositoryRecord repository, string organizationName, string? branch)
     {
         var githubRepository = new GithubRepository(organizationName, repository.Name);
         string path = _repositoryFetcher.EnsureRepositoryUpdated(_pathFormatter, githubRepository);
@@ -64,14 +64,15 @@ public class OrganizationFetcher
             _repositoryFetcher.Checkout(_pathFormatter, githubRepositoryBranch);
         }
 
-        return new GithubOrganizationRepository(path, organizationName, repository.Name);
+        return new ClonedGithubRepository(path, organizationName, repository.Name);
     }
 
     private async Task<List<RepositoryRecord>> GetRepositoryList(IRepositoryDiscoveryService discoveryService, string organizationName)
     {
-        var repos = new List<RepositoryRecord>();
-        await foreach (RepositoryRecord repositoryRecord in discoveryService.TryDiscover(organizationName))
-            repos.Add(repositoryRecord);
-        return repos;
+        IReadOnlyList<Octokit.Repository> repositories = await discoveryService.GetRepositories(organizationName);
+
+        return repositories
+            .Select(r => new RepositoryRecord(r.Name, r.SshUrl, r.CloneUrl, r.DefaultBranch))
+            .ToList();
     }
 }

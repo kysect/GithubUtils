@@ -1,8 +1,8 @@
 ﻿using Kysect.GithubUtils.Models;
-using Kysect.GithubUtils.OrganizationReplication.PathProvider;
-using Kysect.GithubUtils.RepositorySync;
+using Kysect.GithubUtils.Replication.OrganizationsSync.PathProvider;
+using Kysect.GithubUtils.Replication.RepositorySync;
 
-namespace Kysect.GithubUtils.OrganizationReplication;
+namespace Kysect.GithubUtils.Replication.OrganizationsSync;
 
 public class OrganizationReplicator
 {

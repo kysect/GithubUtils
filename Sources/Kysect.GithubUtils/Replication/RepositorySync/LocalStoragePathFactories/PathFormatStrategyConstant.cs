@@ -1,4 +1,4 @@
-﻿namespace Kysect.GithubUtils.RepositorySync.LocalStoragePathFactories;
+﻿namespace Kysect.GithubUtils.Replication.RepositorySync.LocalStoragePathFactories;
 
 public static class PathFormatStrategyConstant
 {

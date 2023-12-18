@@ -1,7 +1,7 @@
 ﻿using Kysect.GithubUtils.Models;
-using Kysect.GithubUtils.RepositorySync.LocalStoragePathFactories;
+using Kysect.GithubUtils.Replication.RepositorySync.LocalStoragePathFactories;
 
-namespace Kysect.GithubUtils.OrganizationReplication.PathProvider;
+namespace Kysect.GithubUtils.Replication.OrganizationsSync.PathProvider;
 
 public class OrganizationReplicatorPathFormatter : IOrganizationReplicatorPathFormatter
 {
