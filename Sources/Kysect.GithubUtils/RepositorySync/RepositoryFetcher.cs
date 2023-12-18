@@ -1,6 +1,6 @@
-﻿using Kysect.GithubUtils.OrganizationReplication.PathProvider;
-using Kysect.GithubUtils.RepositorySync.IPathFormatStrategies;
-using Kysect.GithubUtils.RepositorySync.Models;
+﻿using Kysect.CommonLib.BaseTypes.Extensions;
+using Kysect.GithubUtils.Models;
+using Kysect.GithubUtils.RepositorySync.LocalStoragePathFactories;
 using LibGit2Sharp;
 using Microsoft.Extensions.Logging;
 
@@ -17,8 +17,10 @@ public class RepositoryFetcher
         _logger = logger;
     }
 
-    public string EnsureRepositoryUpdated(IPathFormatStrategy pathFormatter, GithubRepository githubRepository)
+    public string EnsureRepositoryUpdated(ILocalStoragePathFactory pathFormatter, GithubRepository githubRepository)
     {
+        pathFormatter.ThrowIfNull();
+
         try
         {
             return EnsureRepositoryUpdatedInternal();
@@ -47,8 +49,10 @@ public class RepositoryFetcher
         }
     }
 
-    public string Checkout(IPathFormatStrategy pathFormatter, GithubRepositoryBranch repositoryWithBranch)
+    public string Checkout(ILocalStoragePathFactory pathFormatter, GithubRepositoryBranch repositoryWithBranch)
     {
+        pathFormatter.ThrowIfNull();
+
         _logger.LogDebug($"Checkout branch: {repositoryWithBranch}");
         string targetPath = pathFormatter.GetPathToRepositoryWithBranch(repositoryWithBranch);
         _logger.LogDebug($"Branch for {repositoryWithBranch}: {targetPath}");
@@ -100,8 +104,10 @@ public class RepositoryFetcher
         }
     }
 
-    public void CloneAllBranches(IOrganizationReplicatorPathFormatter pathFormatter, GithubRepository githubRepository)
+    public void CloneAllBranches(ILocalStoragePathFactory pathFormatter, GithubRepository githubRepository)
     {
+        pathFormatter.ThrowIfNull();
+
         string masterClonePath = pathFormatter.GetPathToRepository(githubRepository);
 
         _logger.LogDebug($"Try to clone all branches from {githubRepository} to {masterClonePath}");

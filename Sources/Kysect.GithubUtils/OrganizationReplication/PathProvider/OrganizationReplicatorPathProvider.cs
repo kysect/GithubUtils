@@ -1,5 +1,5 @@
-﻿using Kysect.CommonLib.BaseTypes.Extensions;
-using Kysect.GithubUtils.RepositorySync.IPathFormatStrategies;
+﻿using Kysect.GithubUtils.Models;
+using Kysect.GithubUtils.RepositorySync.LocalStoragePathFactories;
 
 namespace Kysect.GithubUtils.OrganizationReplication.PathProvider;
 
@@ -22,26 +22,19 @@ public class OrganizationReplicatorPathFormatter : IOrganizationReplicatorPathFo
         return Path.Combine(_rootDirectory, PathFormatStrategyConstant.MainDirectory, organization);
     }
 
-    public string GetPathToRepository(string organization, string repository)
-    {
-        return Path.Combine(_rootDirectory, PathFormatStrategyConstant.MainDirectory, organization, repository);
-    }
-
     public string GetPathToOrganizationWithBranch(string organization, string branch)
     {
 
         return Path.Combine(_rootDirectory, PathFormatStrategyConstant.CustomBranchDirectory, branch, organization);
     }
 
-    // TODO: rework this
-#pragma warning disable CA1725 // Parameter names should match base declaration
-    public string GetPathToRepositoryWithBranch(string organization, string repository, string branch)
-#pragma warning restore CA1725 // Parameter names should match base declaration
+    public string GetPathToRepository(GithubRepository repository)
     {
-        organization.ThrowIfNull();
-        repository.ThrowIfNull();
-        branch.ThrowIfNull();
+        return Path.Combine(_rootDirectory, PathFormatStrategyConstant.MainDirectory, repository.Owner, repository.Name);
+    }
 
-        return Path.Combine(_rootDirectory, PathFormatStrategyConstant.CustomBranchDirectory, branch, organization, repository);
+    public string GetPathToRepositoryWithBranch(GithubRepositoryBranch repositoryBranch)
+    {
+        return Path.Combine(_rootDirectory, PathFormatStrategyConstant.CustomBranchDirectory, repositoryBranch.Branch, repositoryBranch.Owner, repositoryBranch.Name);
     }
 }

@@ -1,11 +1,11 @@
 using Kysect.GithubUtils.Contributions;
 using Kysect.GithubUtils.Contributions.ActivityProviders;
 using Kysect.GithubUtils.Contributions.ApiResponses;
+using Kysect.GithubUtils.Models;
 using Kysect.GithubUtils.OrganizationReplication;
 using Kysect.GithubUtils.OrganizationReplication.PathProvider;
 using Kysect.GithubUtils.RepositorySync;
-using Kysect.GithubUtils.RepositorySync.IPathFormatStrategies;
-using Kysect.GithubUtils.RepositorySync.Models;
+using Kysect.GithubUtils.RepositorySync.LocalStoragePathFactories;
 using Microsoft.Extensions.Logging;
 using Octokit;
 using System.Text.Json;

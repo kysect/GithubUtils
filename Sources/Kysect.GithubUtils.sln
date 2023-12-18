@@ -5,9 +5,9 @@ VisualStudioVersion = 17.1.31903.286
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kysect.GithubUtils", "Kysect.GithubUtils\Kysect.GithubUtils.csproj", "{E23E0515-FF81-44FF-B66E-FE4555618DCE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kysect.GithubUtils.Polygon", "Kysect.GithubUtils.Polygon\Kysect.GithubUtils.Polygon.csproj", "{59760DD6-FD60-44F2-B6DF-F912F946A229}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kysect.GithubUtils.Polygon", "Kysect.GithubUtils.Polygon\Kysect.GithubUtils.Polygon.csproj", "{59760DD6-FD60-44F2-B6DF-F912F946A229}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kysect.GithubUtils.Tests", "Kysect.GithubUtils.Tests\Kysect.GithubUtils.Tests.csproj", "{F1D97701-923C-414D-B18A-D446A3F5275F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kysect.GithubUtils.Tests", "Kysect.GithubUtils.Tests\Kysect.GithubUtils.Tests.csproj", "{F1D97701-923C-414D-B18A-D446A3F5275F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
