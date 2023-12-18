@@ -23,29 +23,13 @@ public class RepositoryFetcher
 
         try
         {
-            return EnsureRepositoryUpdatedInternal();
+            return EnsureRepositoryUpdatedInternal(pathFormatter, githubRepository);
         }
         catch (Exception e)
         {
             string message = $"Exception while updating {githubRepository}.";
             _logger.LogError($"{message} Error: {e.Message}");
             throw new GithubUtilsException(message, e);
-        }
-
-        string EnsureRepositoryUpdatedInternal()
-        {
-            string targetPath = pathFormatter.GetPathToRepository(githubRepository);
-
-            if (CloneRepositoryIfNeed(targetPath, githubRepository))
-                return targetPath;
-
-            _logger.LogDebug($"Try to fetch updates from remote repository. Repository: {githubRepository}, folder: {targetPath}");
-
-            using var repo = new Repository(targetPath);
-            Remote remote = repo.Network.Remotes["origin"];
-            var refSpecs = remote.FetchRefSpecs.Select(x => x.Specification).ToList();
-            Commands.Fetch(repo, remote.Name, refSpecs, _fetchOptions.FetchOptions, string.Empty);
-            return targetPath;
         }
     }
 
@@ -123,15 +107,31 @@ public class RepositoryFetcher
         }
     }
 
+    private string EnsureRepositoryUpdatedInternal(ILocalStoragePathFactory pathFormatter, GithubRepository githubRepository)
+    {
+        string targetPath = pathFormatter.GetPathToRepository(githubRepository);
+
+        if (CloneRepositoryIfNeed(targetPath, githubRepository))
+            return targetPath;
+
+        _logger.LogDebug($"Try to fetch updates from remote repository. Repository: {githubRepository}, folder: {targetPath}");
+
+        using var repo = new Repository(targetPath);
+        Remote remote = repo.Network.Remotes["origin"];
+        var refSpecs = remote.FetchRefSpecs.Select(x => x.Specification).ToList();
+        Commands.Fetch(repo, remote.Name, refSpecs, _fetchOptions.FetchOptions, string.Empty);
+        return targetPath;
+    }
+
     private bool CloneRepositoryIfNeed(string targetPath, GithubRepository githubRepository)
     {
-        string remoteUrl = githubRepository.ToGithubGitUrl();
-
+        // TODO: handle case when directory exists but is not initialized
         if (Directory.Exists(targetPath))
             return false;
 
         _logger.LogDebug($"Create directory for cloning repo. Repository: {githubRepository}, folder: {targetPath}");
         Directory.CreateDirectory(targetPath);
+        string remoteUrl = githubRepository.ToGithubGitUrl();
         Repository.Clone(remoteUrl, targetPath, _fetchOptions.CloneOptions);
         return true;
     }
