@@ -1,12 +1,12 @@
 ﻿using Kysect.CommonLib.BaseTypes.Extensions;
 using Kysect.CommonLib.Collections.Extensions;
 using Kysect.GithubUtils.Models;
-using Kysect.GithubUtils.OrganizationReplication.PathProvider;
-using Kysect.GithubUtils.RepositoryDiscovering;
-using Kysect.GithubUtils.RepositorySync;
+using Kysect.GithubUtils.Replication.OrganizationsSync.PathProvider;
+using Kysect.GithubUtils.Replication.OrganizationsSync.RepositoryDiscovering;
+using Kysect.GithubUtils.Replication.RepositorySync;
 using Microsoft.Extensions.Logging;
 
-namespace Kysect.GithubUtils.OrganizationReplication;
+namespace Kysect.GithubUtils.Replication.OrganizationsSync;
 
 public class OrganizationReplicationHub
 {

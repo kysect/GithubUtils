@@ -1,4 +1,4 @@
-﻿namespace Kysect.GithubUtils.RepositoryDiscovering.Models;
+﻿namespace Kysect.GithubUtils.Replication.OrganizationsSync.RepositoryDiscovering;
 
 public class RepositoryRecord
 {

@@ -1,10 +1,10 @@
 ﻿using Kysect.CommonLib.BaseTypes.Extensions;
 using Kysect.GithubUtils.Models;
-using Kysect.GithubUtils.RepositorySync.LocalStoragePathFactories;
+using Kysect.GithubUtils.Replication.RepositorySync.LocalStoragePathFactories;
 using LibGit2Sharp;
 using Microsoft.Extensions.Logging;
 
-namespace Kysect.GithubUtils.RepositorySync;
+namespace Kysect.GithubUtils.Replication.RepositorySync;
 
 public class RepositoryFetcher
 {
@@ -43,7 +43,7 @@ public class RepositoryFetcher
 
             using var repo = new Repository(targetPath);
             Remote remote = repo.Network.Remotes["origin"];
-            List<string> refSpecs = remote.FetchRefSpecs.Select(x => x.Specification).ToList();
+            var refSpecs = remote.FetchRefSpecs.Select(x => x.Specification).ToList();
             Commands.Fetch(repo, remote.Name, refSpecs, _fetchOptions.FetchOptions, string.Empty);
             return targetPath;
         }
@@ -97,7 +97,7 @@ public class RepositoryFetcher
             }
 
             Remote remote = repo.Network.Remotes["origin"];
-            List<string> refSpecs = remote.FetchRefSpecs.Select(x => x.Specification).ToList();
+            var refSpecs = remote.FetchRefSpecs.Select(x => x.Specification).ToList();
             Commands.Fetch(repo, remote.Name, refSpecs, _fetchOptions.FetchOptions, string.Empty);
             Commands.Checkout(repo, selectedBranch, _fetchOptions.CheckoutOptions);
             return targetPath;
@@ -136,7 +136,7 @@ public class RepositoryFetcher
         return true;
     }
 
-    private static IReadOnlyCollection<GithubRepositoryBranch> EnumerateBranches(Repository gitRepository, GithubRepository githubRepository)
+    private static IReadOnlyCollection<GithubRepositoryBranch> EnumerateBranches(IRepository gitRepository, GithubRepository githubRepository)
     {
         return gitRepository
             .Branches
