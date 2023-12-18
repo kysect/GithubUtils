@@ -43,7 +43,7 @@ public class RepositoryDiscoveryIntegrationTests
     {
         string expectedRepoName = _configuration.GetSection("ExpectedRepoName").Value.ThrowIfNull();
 
-        IReadOnlyList<GithubRepository> repos = await _discoveryService.GetRepositories(_organisationName);
+        IReadOnlyList<GithubRepositoryBranch> repos = await _discoveryService.GetRepositories(_organisationName);
         Assert.NotNull(repos);
         CollectionAssert.IsNotEmpty(repos);
         // Also checking that pagination is working (pageSize = 100)

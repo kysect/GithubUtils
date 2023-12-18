@@ -4,7 +4,7 @@ using Octokit;
 
 var logger = PredefinedLogger.CreateConsoleLogger();
 
-string token = string.Empty;
+string token = "token";
 
 var client = new GitHubClient(new ProductHeaderValue("Kysect"))
 {
@@ -12,4 +12,4 @@ var client = new GitHubClient(new ProductHeaderValue("Kysect"))
 };
 
 var demoScenarios = new DemoScenarios(logger);
-demoScenarios.CheckOrgContributions(client, "kysect");
+demoScenarios.CheckFetcher();

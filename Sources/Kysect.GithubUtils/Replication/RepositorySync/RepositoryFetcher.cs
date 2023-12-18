@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Kysect.GithubUtils.Replication.RepositorySync;
 
-public class RepositoryFetcher
+public class RepositoryFetcher : IRepositoryFetcher
 {
     private readonly RepositoryFetchOptions _fetchOptions;
     private readonly ILogger _logger;
@@ -21,71 +21,64 @@ public class RepositoryFetcher
     {
         pathFormatter.ThrowIfNull();
 
-        try
-        {
-            return EnsureRepositoryUpdatedInternal(pathFormatter, githubRepository);
-        }
-        catch (Exception e)
-        {
-            string message = $"Exception while updating {githubRepository}.";
-            _logger.LogError($"{message} Error: {e.Message}");
-            throw new GithubUtilsException(message, e);
-        }
+        string targetPath = pathFormatter.GetPathToRepository(githubRepository);
+
+        if (CloneRepositoryIfNeed(targetPath, githubRepository))
+            return targetPath;
+
+        _logger.LogDebug($"Try to fetch updates from remote repository. Repository: {githubRepository}, folder: {targetPath}");
+
+        using var repo = new Repository(targetPath);
+        Remote remote = repo.Network.Remotes["origin"];
+        List<string> refSpecs = remote.FetchRefSpecs
+            .Select(x => x.Specification)
+            .ToList();
+
+        Commands.Fetch(repo, remote.Name, refSpecs, _fetchOptions.FetchOptions, string.Empty);
+        return targetPath;
     }
 
-    public string Checkout(ILocalStoragePathFactory pathFormatter, GithubRepositoryBranch repositoryWithBranch)
+    public string Checkout(ILocalStoragePathFactory pathFormatter, GithubRepositoryBranch repositoryWithBranch, bool directoryPerBranch = false)
     {
         pathFormatter.ThrowIfNull();
 
         _logger.LogDebug($"Checkout branch: {repositoryWithBranch}");
-        string targetPath = pathFormatter.GetPathToRepositoryWithBranch(repositoryWithBranch);
-        _logger.LogDebug($"Branch for {repositoryWithBranch}: {targetPath}");
+        string targetPath = directoryPerBranch
+            ? pathFormatter.GetPathToRepositoryWithBranch(repositoryWithBranch)
+            : pathFormatter.GetPathToRepository(new GithubRepository(repositoryWithBranch.Owner, repositoryWithBranch.Name));
+
         CloneRepositoryIfNeed(targetPath, repositoryWithBranch.GetRepository());
 
-        try
+        using var repo = new Repository(targetPath);
+        Branch selectedBranch = repo.Branches[repositoryWithBranch.Branch];
+        if (selectedBranch is null)
         {
-            return CheckoutInternal();
-        }
-        catch (Exception e)
-        {
-            var message = $"Exception while checkout {repositoryWithBranch}";
-            _logger.LogError($"{message} Error: {e.Message}");
-            throw new GithubUtilsException(message, e);
+            _logger.LogTrace($"Branch {repositoryWithBranch} was not found, try to use origin/{selectedBranch}");
+            selectedBranch = repo.Branches[$"origin/{selectedBranch}"];
         }
 
-        string CheckoutInternal()
+        if (selectedBranch is null)
         {
-            using var repo = new Repository(targetPath);
-            Branch selectedBranch = repo.Branches[repositoryWithBranch.Branch];
-            if (selectedBranch is null)
+            var message = $"Specified branch was not found: {repositoryWithBranch}";
+            _logger.LogError(message);
+            _logger.LogInformation("Available branches: " + string.Join(", ", repo.Branches.Select(b => b.FriendlyName)));
+
+            if (!_fetchOptions.IgnoreMissedBranch)
             {
-                _logger.LogTrace($"Branch {repositoryWithBranch} was not found, try to use origin/{selectedBranch}");
-                selectedBranch = repo.Branches[$"origin/{selectedBranch}"];
+                _logger.LogError($"Failed to checkout {repositoryWithBranch}. Branch was not found.");
+                throw new ArgumentException(message);
             }
 
-            if (selectedBranch is null)
-            {
-                var message = $"Specified branch was not found: {repositoryWithBranch}";
-                _logger.LogError(message);
-                _logger.LogInformation("Available branches: " + string.Join(", ", repo.Branches.Select(b => b.FriendlyName)));
+            _logger.LogWarning($"Skip checkout to branch {repositoryWithBranch}. No such branch in repository.");
 
-                if (!_fetchOptions.IgnoreMissedBranch)
-                {
-                    _logger.LogError($"Failed to checkout {repositoryWithBranch}. Branch was not found.");
-                    throw new ArgumentException(message);
-                }
-
-                _logger.LogWarning($"Skip checkout to branch {repositoryWithBranch}. No such branch in repository.");
-
-                return targetPath;
-            }
-
-            Remote remote = repo.Network.Remotes["origin"];
-            var refSpecs = remote.FetchRefSpecs.Select(x => x.Specification).ToList();
-            Commands.Fetch(repo, remote.Name, refSpecs, _fetchOptions.FetchOptions, string.Empty);
-            Commands.Checkout(repo, selectedBranch, _fetchOptions.CheckoutOptions);
             return targetPath;
         }
+
+        Remote remote = repo.Network.Remotes["origin"];
+        var refSpecs = remote.FetchRefSpecs.Select(x => x.Specification).ToList();
+        Commands.Fetch(repo, remote.Name, refSpecs, _fetchOptions.FetchOptions, string.Empty);
+        Commands.Checkout(repo, selectedBranch, _fetchOptions.CheckoutOptions);
+        return targetPath;
     }
 
     public void CloneAllBranches(ILocalStoragePathFactory pathFormatter, GithubRepository githubRepository)
@@ -103,24 +96,8 @@ public class RepositoryFetcher
 
         foreach (GithubRepositoryBranch branch in branches)
         {
-            Checkout(pathFormatter, branch);
+            Checkout(pathFormatter, branch, directoryPerBranch: true);
         }
-    }
-
-    private string EnsureRepositoryUpdatedInternal(ILocalStoragePathFactory pathFormatter, GithubRepository githubRepository)
-    {
-        string targetPath = pathFormatter.GetPathToRepository(githubRepository);
-
-        if (CloneRepositoryIfNeed(targetPath, githubRepository))
-            return targetPath;
-
-        _logger.LogDebug($"Try to fetch updates from remote repository. Repository: {githubRepository}, folder: {targetPath}");
-
-        using var repo = new Repository(targetPath);
-        Remote remote = repo.Network.Remotes["origin"];
-        var refSpecs = remote.FetchRefSpecs.Select(x => x.Specification).ToList();
-        Commands.Fetch(repo, remote.Name, refSpecs, _fetchOptions.FetchOptions, string.Empty);
-        return targetPath;
     }
 
     private bool CloneRepositoryIfNeed(string targetPath, GithubRepository githubRepository)
