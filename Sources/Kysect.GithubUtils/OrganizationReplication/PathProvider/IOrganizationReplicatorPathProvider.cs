@@ -1,8 +1,8 @@
-﻿using Kysect.GithubUtils.RepositorySync.IPathFormatStrategies;
+﻿using Kysect.GithubUtils.RepositorySync.LocalStoragePathFactories;
 
 namespace Kysect.GithubUtils.OrganizationReplication.PathProvider;
 
-public interface IOrganizationReplicatorPathFormatter : IPathFormatStrategy
+public interface IOrganizationReplicatorPathFormatter : ILocalStoragePathFactory
 {
     string GetPathToOrganizations();
     string GetPathToOrganization(string organization);

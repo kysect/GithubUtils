@@ -1,7 +1,7 @@
-﻿using Kysect.GithubUtils.RepositoryDiscovering;
+﻿using Kysect.GithubUtils.Models;
+using Kysect.GithubUtils.RepositoryDiscovering;
 using Kysect.GithubUtils.RepositoryDiscovering.Models;
-using Kysect.GithubUtils.RepositorySync.IPathFormatStrategies;
-using Kysect.GithubUtils.RepositorySync.Models;
+using Kysect.GithubUtils.RepositorySync.LocalStoragePathFactories;
 using Microsoft.Extensions.Logging;
 
 namespace Kysect.GithubUtils.RepositorySync;
@@ -11,11 +11,11 @@ public class OrganizationFetcher
     private readonly bool _useParallelProcessing;
 
     private readonly RepositoryFetcher _repositoryFetcher;
-    private readonly IPathFormatStrategy _pathFormatter;
+    private readonly ILocalStoragePathFactory _pathFormatter;
     private readonly IRepositoryDiscoveryService _discoveryService;
     private readonly ILogger _logger;
 
-    public OrganizationFetcher(IRepositoryDiscoveryService discoveryService, RepositoryFetcher repositoryFetcher, IPathFormatStrategy pathFormatter, ILogger logger, bool useParallelProcessing = true)
+    public OrganizationFetcher(IRepositoryDiscoveryService discoveryService, RepositoryFetcher repositoryFetcher, ILocalStoragePathFactory pathFormatter, ILogger logger, bool useParallelProcessing = true)
     {
         _discoveryService = discoveryService;
         _repositoryFetcher = repositoryFetcher;
