@@ -1,4 +1,4 @@
-﻿namespace Kysect.GithubUtils;
+﻿namespace Kysect.GithubUtils.Inviting;
 
 public record UserInviteResult(string Username, UserInviteResultType Result, string? Reason);
 

@@ -1,4 +1,6 @@
-﻿using Kysect.CommonLib.Collections.Extensions;
+﻿using Kysect.CommonLib.BaseTypes.Extensions;
+using Kysect.CommonLib.Collections.Extensions;
+using Kysect.GithubUtils.OrganizationReplication.PathProvider;
 using Kysect.GithubUtils.RepositoryDiscovering;
 using Kysect.GithubUtils.RepositorySync;
 using Kysect.GithubUtils.RepositorySync.Models;
@@ -61,6 +63,9 @@ public class OrganizationReplicationHub
 
     public IReadOnlyCollection<GithubRepository> GetRepositories(string organizationName, bool useMasterBranch, params string[] branches)
     {
+        organizationName.ThrowIfNull();
+        branches.ThrowIfNull();
+
         var result = new List<GithubRepository>();
         if (useMasterBranch)
         {

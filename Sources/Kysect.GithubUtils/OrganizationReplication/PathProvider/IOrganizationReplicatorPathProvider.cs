@@ -1,6 +1,6 @@
-﻿using Kysect.GithubUtils.RepositorySync;
+﻿using Kysect.GithubUtils.RepositorySync.IPathFormatStrategies;
 
-namespace Kysect.GithubUtils.OrganizationReplication;
+namespace Kysect.GithubUtils.OrganizationReplication.PathProvider;
 
 public interface IOrganizationReplicatorPathFormatter : IPathFormatStrategy
 {

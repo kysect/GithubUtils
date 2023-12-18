@@ -1,6 +1,7 @@
-﻿namespace Kysect.GithubUtils.RepositoryDiscovering;
+﻿namespace Kysect.GithubUtils.RepositoryDiscovering.Models;
 
-public class RepositoryRecord {
+public class RepositoryRecord
+{
     /// <summary>
     /// Name of repository
     /// </summary>
@@ -12,9 +13,6 @@ public class RepositoryRecord {
     /// </summary>
     public string SshCloneUrl { get; }
 
-    /// <summary>
-    /// <see cref="DetCheckR.Common.CommonGithubReader"/>-compatible HTTPS url for cloning
-    /// </summary>
     public string HttpsCloneUrl { get; }
 
     /// <summary>
@@ -25,7 +23,8 @@ public class RepositoryRecord {
     public RepositoryRecord(string name,
         string sshCloneUrl,
         string httpsCloneUrl,
-        string defaultBranchName = "master") {
+        string defaultBranchName = "master")
+    {
         Name = name;
         SshCloneUrl = sshCloneUrl;
         HttpsCloneUrl = httpsCloneUrl;

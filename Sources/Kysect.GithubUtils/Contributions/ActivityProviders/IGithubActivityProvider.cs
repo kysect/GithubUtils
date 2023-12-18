@@ -1,4 +1,6 @@
-﻿namespace Kysect.GithubUtils.Contributions;
+﻿using Kysect.GithubUtils.Contributions.ApiResponses;
+
+namespace Kysect.GithubUtils.Contributions.ActivityProviders;
 
 public interface IGithubActivityProvider
 {
