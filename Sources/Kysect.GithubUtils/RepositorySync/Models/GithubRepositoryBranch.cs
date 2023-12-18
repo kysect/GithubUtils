@@ -7,7 +7,10 @@ public readonly record struct GithubRepositoryBranch(string Owner, string Name, 
     {
     }
 
-    public GithubRepository GetRepository() => new GithubRepository(Owner, Name);
+    public GithubRepository GetRepository()
+    {
+        return new GithubRepository(Owner, Name);
+    }
 
     public override string ToString()
     {

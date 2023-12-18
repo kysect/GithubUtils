@@ -1,4 +1,4 @@
-﻿namespace Kysect.GithubUtils.RepositorySync;
+﻿namespace Kysect.GithubUtils.RepositorySync.IPathFormatStrategies;
 
 public class UseOwnerForFolderNameStrategy : IPathFormatStrategy
 {

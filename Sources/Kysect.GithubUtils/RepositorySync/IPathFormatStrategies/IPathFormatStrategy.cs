@@ -1,7 +1,7 @@
 ﻿using Kysect.CommonLib.BaseTypes.Extensions;
 using Kysect.GithubUtils.RepositorySync.Models;
 
-namespace Kysect.GithubUtils.RepositorySync;
+namespace Kysect.GithubUtils.RepositorySync.IPathFormatStrategies;
 
 public static class PathFormatStrategyConstant
 {

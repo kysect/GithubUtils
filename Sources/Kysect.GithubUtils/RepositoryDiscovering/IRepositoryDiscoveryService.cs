@@ -1,4 +1,6 @@
-﻿namespace Kysect.GithubUtils.RepositoryDiscovering;
+﻿using Kysect.GithubUtils.RepositoryDiscovering.Models;
+
+namespace Kysect.GithubUtils.RepositoryDiscovering;
 
 public interface IRepositoryDiscoveryService
 {

@@ -1,6 +1,7 @@
-﻿using Kysect.GithubUtils.RepositorySync;
+﻿using Kysect.CommonLib.BaseTypes.Extensions;
+using Kysect.GithubUtils.RepositorySync.IPathFormatStrategies;
 
-namespace Kysect.GithubUtils.OrganizationReplication;
+namespace Kysect.GithubUtils.OrganizationReplication.PathProvider;
 
 public class OrganizationReplicatorPathFormatter : IOrganizationReplicatorPathFormatter
 {
@@ -32,8 +33,14 @@ public class OrganizationReplicatorPathFormatter : IOrganizationReplicatorPathFo
         return Path.Combine(_rootDirectory, PathFormatStrategyConstant.CustomBranchDirectory, branch, organization);
     }
 
+    // TODO: rework this
+#pragma warning disable CA1725 // Parameter names should match base declaration
     public string GetPathToRepositoryWithBranch(string organization, string repository, string branch)
+#pragma warning restore CA1725 // Parameter names should match base declaration
     {
+        organization.ThrowIfNull();
+        repository.ThrowIfNull();
+        branch.ThrowIfNull();
 
         return Path.Combine(_rootDirectory, PathFormatStrategyConstant.CustomBranchDirectory, branch, organization, repository);
     }

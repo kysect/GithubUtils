@@ -1,8 +1,9 @@
 ﻿using Kysect.CommonLib.BaseTypes.Extensions;
+using Kysect.GithubUtils.RepositoryDiscovering.Exceptions;
 using System.Net;
 using System.Text.Json;
 
-namespace Kysect.GithubUtils.RepositoryDiscovering;
+namespace Kysect.GithubUtils.RepositoryDiscovering.Common;
 
 internal static class HttpResponseMessageExtensions
 {
@@ -42,15 +43,15 @@ internal static class HttpResponseMessageExtensions
     private static Task<TResponse> ProcessErrorResponse<TResponse>(
         this HttpResponseMessage httpResponse) where TResponse : class
     {
-        throw (int)httpResponse.StatusCode switch
+        throw (int) httpResponse.StatusCode switch
         {
-            (int)HttpStatusCode.NotFound => new RepositoryDiscoveryGenericException(
+            (int) HttpStatusCode.NotFound => new RepositoryDiscoveryGenericException(
                 "Specified organization was not found"),
-            (int)HttpStatusCode.Unauthorized => new RepositoryDiscoveryGenericException(
+            (int) HttpStatusCode.Unauthorized => new RepositoryDiscoveryGenericException(
                 "Invalid token was passed"),
-            (int)HttpStatusCode.Forbidden => new RepositoryDiscoveryGenericException(
+            (int) HttpStatusCode.Forbidden => new RepositoryDiscoveryGenericException(
                 "API rate limit exceeded"),
-            (int)HttpStatusCode.BadRequest => new RepositoryDiscoveryGenericException(
+            (int) HttpStatusCode.BadRequest => new RepositoryDiscoveryGenericException(
                 "Malformed request"),
             422 => new RepositoryDiscoveryGenericException("Unprocessable request"),
             _ => new RepositoryDiscoveryGenericException(

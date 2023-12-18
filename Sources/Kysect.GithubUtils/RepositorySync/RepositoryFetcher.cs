@@ -1,4 +1,5 @@
-﻿using Kysect.GithubUtils.OrganizationReplication;
+﻿using Kysect.GithubUtils.OrganizationReplication.PathProvider;
+using Kysect.GithubUtils.RepositorySync.IPathFormatStrategies;
 using Kysect.GithubUtils.RepositorySync.Models;
 using LibGit2Sharp;
 using Microsoft.Extensions.Logging;
@@ -122,7 +123,7 @@ public class RepositoryFetcher
 
         if (Directory.Exists(targetPath))
             return false;
-        
+
         _logger.LogDebug($"Create directory for cloning repo. Repository: {githubRepository}, folder: {targetPath}");
         Directory.CreateDirectory(targetPath);
         Repository.Clone(remoteUrl, targetPath, _fetchOptions.CloneOptions);
