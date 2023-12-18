@@ -1,7 +1,8 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Kysect.CommonLib.BaseTypes.Extensions;
+using Microsoft.Extensions.Logging;
 using Octokit;
 
-namespace Kysect.GithubUtils;
+namespace Kysect.GithubUtils.Inviting;
 
 public class OrganizationInviteSender
 {
@@ -34,6 +35,9 @@ public class OrganizationInviteSender
     /// </summary>
     public async Task<IReadOnlyCollection<UserInviteResult>> Invite(string organizationName, IReadOnlyCollection<string> usernames)
     {
+        organizationName.ThrowIfNull();
+        usernames.ThrowIfNull();
+
         _logger.LogInformation($"Start sending invites to organization {organizationName}. Invites count: {usernames.Count}");
 
         usernames = usernames.Select(u => u.ToLower()).ToList();
@@ -94,7 +98,7 @@ public class OrganizationInviteSender
                 inviteResults.Add(new UserInviteResult(username, UserInviteResultType.Skipped, forbiddenException.Message));
                 continue;
             }
-            
+
             _logger.LogDebug($"Invite user {username} to organization {organizationName}");
 
             try

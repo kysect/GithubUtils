@@ -1,9 +1,10 @@
-﻿namespace Kysect.GithubUtils.RepositoryDiscovering;
+﻿namespace Kysect.GithubUtils.RepositoryDiscovering.Models;
 
 /// <summary>
 /// Specifies the types of GitHub repository
 /// </summary>
-public enum GitHubRepositoryType {
+public enum GitHubRepositoryType
+{
     Public,
     Private,
     Forks,

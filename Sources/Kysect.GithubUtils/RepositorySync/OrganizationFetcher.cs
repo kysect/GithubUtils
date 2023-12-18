@@ -1,4 +1,6 @@
 ﻿using Kysect.GithubUtils.RepositoryDiscovering;
+using Kysect.GithubUtils.RepositoryDiscovering.Models;
+using Kysect.GithubUtils.RepositorySync.IPathFormatStrategies;
 using Kysect.GithubUtils.RepositorySync.Models;
 using Microsoft.Extensions.Logging;
 

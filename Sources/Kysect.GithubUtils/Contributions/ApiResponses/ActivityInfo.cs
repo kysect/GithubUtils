@@ -1,36 +1,41 @@
-﻿namespace Kysect.GithubUtils.Contributions
+﻿using Kysect.CommonLib.BaseTypes.Extensions;
+
+namespace Kysect.GithubUtils.Contributions.ApiResponses;
+
+public class ActivityInfo
 {
-    public class ActivityInfo
+    public IReadOnlyCollection<ContributionsInfo>? Contributions { get; set; }
+
+    public int Total => PerMonthActivity().Sum(a => a.Count);
+
+    public IReadOnlyCollection<ContributionsInfo> PerMonthActivity()
     {
-        public ContributionsInfo[] Contributions { get; set; }
+        Contributions.ThrowIfNull();
 
-        public int Total => PerMonthActivity().Sum(a => a.Count);
+        return Contributions
+            .GroupBy(c => c.Date.Month.ToString() + "." + c.Date.Year.ToString())
+            .Select(c => new ContributionsInfo(c.Key, c.Sum(_ => _.Count)))
+            .ToList();
+    }
 
-        public List<ContributionsInfo> PerMonthActivity()
+    public ActivityInfo FilterValues(DateTime? from, DateTime? to)
+    {
+        Contributions.ThrowIfNull();
+
+        IEnumerable<ContributionsInfo> result = Contributions;
+        if (from is not null)
+            result = result.Where(a => a.Date >= from);
+        if (to is not null)
+            result = result.Where(a => a.Date <= to);
+
+        return new ActivityInfo
         {
-            return Contributions
-                .GroupBy(c => c.Date.Month.ToString() + "." + c.Date.Year.ToString())
-                .Select(c => new ContributionsInfo(c.Key, c.Sum(_ => _.Count)))
-                .ToList();
-        }
+            Contributions = result.ToArray()
+        };
+    }
 
-        public ActivityInfo FilterValues(DateTime? from, DateTime? to)
-        {
-            IEnumerable<ContributionsInfo> result = Contributions;
-            if (from is not null)
-                result = result.Where(a => a.Date >= from);
-            if (to is not null)
-                result = result.Where(a => a.Date <= to);
-
-            return new ActivityInfo
-            {
-                Contributions = result.ToArray()
-            };
-        }
-
-        public int GetActivityForPeriod(DateTime from, DateTime to)
-        {
-            return FilterValues(@from, to).Total;
-        }
+    public int GetActivityForPeriod(DateTime from, DateTime to)
+    {
+        return FilterValues(@from, to).Total;
     }
 }

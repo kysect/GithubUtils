@@ -1,7 +1,9 @@
-﻿using System.Net.Http.Headers;
+﻿using Kysect.GithubUtils.RepositoryDiscovering.Exceptions;
+using Kysect.GithubUtils.RepositoryDiscovering.Models;
+using System.Net.Http.Headers;
 using System.Reflection;
 
-namespace Kysect.GithubUtils.RepositoryDiscovering;
+namespace Kysect.GithubUtils.RepositoryDiscovering.Common;
 
 public class GithubHttpClient : IDisposable
 {
@@ -71,12 +73,16 @@ public class GithubHttpClient : IDisposable
         GitHubRepositoryType repositoryTypeFilter = GitHubRepositoryType.All)
     {
         if (string.IsNullOrEmpty(organization))
+        {
             throw new RepositoryDiscoveryConfigurationException("GitHub Organization was not specified",
                 new ArgumentNullException(nameof(organization)));
+        }
 
         if (page < 1)
+        {
             throw new RepositoryDiscoveryConfigurationException("Page number should be greater than zero",
                 new ArgumentOutOfRangeException(nameof(page)));
+        }
 
 
         var queryParameters = new Dictionary<string, string>

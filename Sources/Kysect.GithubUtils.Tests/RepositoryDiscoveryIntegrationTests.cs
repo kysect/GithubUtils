@@ -1,38 +1,32 @@
+using Kysect.CommonLib.BaseTypes.Extensions;
 using NUnit.Framework;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 using Kysect.GithubUtils.RepositoryDiscovering;
+using Kysect.GithubUtils.RepositoryDiscovering.Exceptions;
+using Kysect.GithubUtils.RepositoryDiscovering.Models;
 using Microsoft.Extensions.Configuration;
 
 namespace Kysect.GithubUtils.Tests;
 
 //to pass tests you should specify some information in appsettings.json
-
+[TestFixture]
 [Ignore("Only manual run")]
 public class RepositoryDiscoveryIntegrationTests
 {
-    private IRepositoryDiscoveryService _discoveryService;
-    private string _productionToken;
-    private string _organisationName;
-    private IConfiguration _configuration;
+    private IRepositoryDiscoveryService _discoveryService = null!;
+    private string _productionToken = null!;
+    private string _organisationName = null!;
+    private IConfiguration _configuration = null!;
 
-    [SetUp] 
+    [SetUp]
     public void Setup()
     {
         var builder = new ConfigurationBuilder()
-            .SetBasePath(
-                Directory.GetParent(Directory.GetParent(Directory.GetParent(
-                        Directory.GetCurrentDirectory())!
-                    .ToString())?.ToString() ?? string.Empty)?.ToString())
             .AddJsonFile("appsettings.json", optional: false);
         _configuration = builder.Build();
-        _productionToken = _configuration.GetSection("Github").GetSection("Token").Value;
-        _organisationName = _configuration.GetSection("Github").GetSection("OrganisationName").Value;
+        _productionToken = _configuration.GetSection("Github").GetSection("Token").Value.ThrowIfNull();
+        _organisationName = _configuration.GetSection("Github").GetSection("OrganisationName").Value.ThrowIfNull();
     }
-    
+
     [Test]
     public void ShouldCreateGitHubRepositoryDiscoveryService_Successful()
     {
@@ -69,7 +63,7 @@ public class RepositoryDiscoveryIntegrationTests
     public void ShouldHandleUnauthorizedScenarios_ThrowsRuntimeException(string token)
     {
         _discoveryService = new GitHubRepositoryDiscoveryService(token);
-        List<RepositoryRecord> repos = null;
+        List<RepositoryRecord> repos = new List<RepositoryRecord>();
         var exception = Assert.ThrowsAsync<RepositoryDiscoveryGenericException>(async () =>
         {
             repos = await _discoveryService.TryDiscover(_organisationName).ToListAsync();
@@ -84,7 +78,7 @@ public class RepositoryDiscoveryIntegrationTests
     public void ShouldHandleOrganizationNotFoundScenario_ThrowsRuntimeException(string org)
     {
         _discoveryService = new GitHubRepositoryDiscoveryService(_productionToken);
-        List<RepositoryRecord> repos = null;
+        List<RepositoryRecord> repos = [];
         var exception = Assert.ThrowsAsync<RepositoryDiscoveryGenericException>(async () =>
         {
             repos = await _discoveryService.TryDiscover(org).ToListAsync();
@@ -98,13 +92,13 @@ public class RepositoryDiscoveryIntegrationTests
 
     public async Task ShouldBeAbleToGetOrganisationRepositories()
     {
-        string expectedRepoName = _configuration.GetSection("ExpectedRepoName").Value;
+        string expectedRepoName = _configuration.GetSection("ExpectedRepoName").Value.ThrowIfNull();
         _discoveryService = new GitHubRepositoryDiscoveryService(_productionToken);
         var repos = await _discoveryService.TryDiscover(_organisationName).ToListAsync();
         Assert.NotNull(repos);
         CollectionAssert.IsNotEmpty(repos);
         // Also checking that pagination is working (pageSize = 100)
-        Assert.Greater(repos.Count(), 100);
+        Assert.Greater(repos.Count, 100);
         Assert.NotNull(repos.FirstOrDefault(repo => repo.Name == expectedRepoName),
             "Expected template repository was not found");
     }

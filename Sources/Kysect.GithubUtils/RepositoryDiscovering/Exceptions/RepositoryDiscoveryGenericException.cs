@@ -1,4 +1,4 @@
-﻿namespace Kysect.GithubUtils.RepositoryDiscovering;
+﻿namespace Kysect.GithubUtils.RepositoryDiscovering.Exceptions;
 
 public class RepositoryDiscoveryGenericException : Exception
 {

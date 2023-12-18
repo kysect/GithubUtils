@@ -1,0 +1,65 @@
+using Kysect.GithubUtils.Contributions;
+using Kysect.GithubUtils.Contributions.ActivityProviders;
+using Kysect.GithubUtils.Contributions.ApiResponses;
+using Kysect.GithubUtils.OrganizationReplication;
+using Kysect.GithubUtils.OrganizationReplication.PathProvider;
+using Kysect.GithubUtils.RepositorySync;
+using Kysect.GithubUtils.RepositorySync.IPathFormatStrategies;
+using Kysect.GithubUtils.RepositorySync.Models;
+using Microsoft.Extensions.Logging;
+using Octokit;
+using System.Text.Json;
+
+namespace Kysect.GithubUtils.Polygon;
+
+public class DemoScenarios
+{
+    private readonly ILogger _logger;
+
+    public DemoScenarios(ILogger logger)
+    {
+        _logger = logger;
+    }
+
+    public void CheckFetcher()
+    {
+        var gitUser = string.Empty;
+        var token = string.Empty;
+        var repositoryFetcher = new RepositoryFetcher(new RepositoryFetchOptions(gitUser, token), _logger);
+        var githubRepository = new GithubRepository("fredikats", "test");
+        repositoryFetcher.EnsureRepositoryUpdated(new UseOwnerAndRepoForFolderNameStrategy("repo"), githubRepository);
+        repositoryFetcher.Checkout(new UseOwnerAndRepoForFolderNameStrategy("repo"), new GithubRepositoryBranch(githubRepository, "main"));
+        repositoryFetcher.Checkout(new UseOwnerAndRepoForFolderNameStrategy("repo"), new GithubRepositoryBranch(githubRepository, "qq"));
+    }
+
+    public void CheckStatParser()
+    {
+        using GithubActivityProvider provider = new GithubActivityProvider(_logger);
+        ActivityInfo activityInfo = provider.GetActivityInfo("FrediKats");
+        Console.WriteLine(JsonSerializer.Serialize(activityInfo.PerMonthActivity()));
+    }
+
+    public void CloneCustomBranch()
+    {
+        var gitUser = "fredikats";
+        var token = string.Empty;
+        var repositoryFetcher = new RepositoryFetcher(new RepositoryFetchOptions(gitUser, token), _logger);
+        var organizationReplicatorPathProvider = new OrganizationReplicatorPathFormatter("test-repos");
+        var organizationReplicationHub = new OrganizationReplicationHub(organizationReplicatorPathProvider, repositoryFetcher, _logger);
+        organizationReplicationHub.TryAddOrganization("fredikats");
+        OrganizationReplicator organizationReplicator = organizationReplicationHub.GetOrganizationReplicator("fredikats");
+        organizationReplicator.Clone("fredikats");
+        organizationReplicator.CloneBranch("fredikats", "master");
+    }
+
+    public void CheckOrgContributions(GitHubClient client, string organization)
+    {
+        var organizationContributionFetcher = new OrganizationContributionFetcher(client, _logger);
+        List<OrganizationContributor> organizationContributors = organizationContributionFetcher.FetchOrganizationStatistic(organization).Result;
+        organizationContributors = organizationContributors.OrderByDescending(c => c.Contributions).ToList();
+        foreach ((string? username, int contributions) in organizationContributors)
+        {
+            Console.WriteLine($"{username}\t{contributions}");
+        }
+    }
+}
