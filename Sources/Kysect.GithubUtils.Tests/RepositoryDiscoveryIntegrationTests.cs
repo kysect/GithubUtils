@@ -3,6 +3,7 @@ using Kysect.GithubUtils.Replication.OrganizationsSync.RepositoryDiscovering;
 using NUnit.Framework;
 using Microsoft.Extensions.Configuration;
 using Octokit;
+using Kysect.GithubUtils.Models;
 
 namespace Kysect.GithubUtils.Tests;
 
@@ -42,7 +43,7 @@ public class RepositoryDiscoveryIntegrationTests
     {
         string expectedRepoName = _configuration.GetSection("ExpectedRepoName").Value.ThrowIfNull();
 
-        IReadOnlyList<Repository> repos = await _discoveryService.GetRepositories(_organisationName);
+        IReadOnlyList<GithubRepository> repos = await _discoveryService.GetRepositories(_organisationName);
         Assert.NotNull(repos);
         CollectionAssert.IsNotEmpty(repos);
         // Also checking that pagination is working (pageSize = 100)

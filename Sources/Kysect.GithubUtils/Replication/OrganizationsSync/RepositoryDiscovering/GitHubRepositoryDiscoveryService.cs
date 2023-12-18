@@ -1,4 +1,5 @@
 ﻿using Kysect.CommonLib.BaseTypes.Extensions;
+using Kysect.GithubUtils.Models;
 using Octokit;
 
 namespace Kysect.GithubUtils.Replication.OrganizationsSync.RepositoryDiscovering;
@@ -14,9 +15,13 @@ public sealed class GitHubRepositoryDiscoveryService : IRepositoryDiscoveryServi
         _gitHubClient = gitHubClient.ThrowIfNull();
     }
 
-    public Task<IReadOnlyList<Repository>> GetRepositories(string organization)
+    public async Task<IReadOnlyList<GithubRepository>> GetRepositories(string organization)
     {
         // TODO: support getting for User also
-        return _gitHubClient.Repository.GetAllForOrg(organization, new ApiOptions { PageSize = PageSize });
+        IReadOnlyList<Repository> repositories = await _gitHubClient.Repository.GetAllForOrg(organization, new ApiOptions { PageSize = PageSize });
+
+        return repositories
+            .Select(r => new GithubRepository(r.Owner.Name, r.Name))
+            .ToList();
     }
 }
