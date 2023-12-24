@@ -1,8 +1,8 @@
-using Kysect.CommonLib.DependencyInjection;
+using Kysect.CommonLib.DependencyInjection.Logging;
 using Kysect.GithubUtils.Polygon;
 using Octokit;
 
-var logger = PredefinedLogger.CreateConsoleLogger();
+var logger = DefaultLoggerConfiguration.CreateConsoleLogger();
 
 string token = "token";
 

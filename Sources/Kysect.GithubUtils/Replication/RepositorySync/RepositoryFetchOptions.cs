@@ -10,14 +10,6 @@ public class RepositoryFetchOptions
     public FetchOptions FetchOptions { get; init; }
     public CloneOptions CloneOptions { get; init; }
 
-    public RepositoryFetchOptions(bool ignoreMissedBranch, CheckoutOptions checkoutOptions, FetchOptions fetchOptions, CloneOptions cloneOptions)
-    {
-        IgnoreMissedBranch = ignoreMissedBranch;
-        CheckoutOptions = checkoutOptions;
-        FetchOptions = fetchOptions;
-        CloneOptions = cloneOptions;
-    }
-
     public RepositoryFetchOptions(string gitUser, string token, bool ignoreMissedBranch = false)
     {
         IgnoreMissedBranch = ignoreMissedBranch;
@@ -38,7 +30,15 @@ public class RepositoryFetchOptions
 
     public static CloneOptions CreateDefaultCloneOptions(string gitUser, string token)
     {
-        return new CloneOptions { CredentialsProvider = CreateHandlerForToken(gitUser, token) };
+        var defaultCloneOptions = new CloneOptions
+        {
+            FetchOptions =
+            {
+                CredentialsProvider = CreateHandlerForToken(gitUser, token)
+            }
+        };
+
+        return defaultCloneOptions;
     }
 
     private static CredentialsHandler CreateHandlerForToken(string gitUser, string token)
