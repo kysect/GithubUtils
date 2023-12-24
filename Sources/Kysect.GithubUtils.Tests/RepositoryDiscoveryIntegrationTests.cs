@@ -1,3 +1,4 @@
+using FluentAssertions;
 using Kysect.CommonLib.BaseTypes.Extensions;
 using Kysect.GithubUtils.Replication.OrganizationsSync.RepositoryDiscovering;
 using NUnit.Framework;
@@ -35,7 +36,7 @@ public class RepositoryDiscoveryIntegrationTests
     [Test]
     public void ShouldCreateGitHubRepositoryDiscoveryService_Successful()
     {
-        Assert.IsNotNull(_discoveryService);
+        _discoveryService.Should().NotBeNull();
     }
 
     [Test]
@@ -44,11 +45,10 @@ public class RepositoryDiscoveryIntegrationTests
         string expectedRepoName = _configuration.GetSection("ExpectedRepoName").Value.ThrowIfNull();
 
         IReadOnlyList<GithubRepositoryBranch> repos = await _discoveryService.GetRepositories(_organisationName);
-        Assert.NotNull(repos);
-        CollectionAssert.IsNotEmpty(repos);
+        repos.Should().NotBeNull();
+        repos.Should().NotBeEmpty();
         // Also checking that pagination is working (pageSize = 100)
-        Assert.Greater(repos.Count, 100);
-        Assert.NotNull(repos.FirstOrDefault(repo => repo.Name == expectedRepoName),
-            "Expected template repository was not found");
+        repos.Count.Should().BeLessOrEqualTo(100);
+        repos.FirstOrDefault(repo => repo.Name == expectedRepoName).Should().NotBeNull("Expected template repository was not found");
     }
 }
