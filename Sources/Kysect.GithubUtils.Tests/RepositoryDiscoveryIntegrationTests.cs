@@ -1,7 +1,6 @@
 using FluentAssertions;
 using Kysect.CommonLib.BaseTypes.Extensions;
 using Kysect.GithubUtils.Replication.OrganizationsSync.RepositoryDiscovering;
-using NUnit.Framework;
 using Microsoft.Extensions.Configuration;
 using Octokit;
 using Kysect.GithubUtils.Models;
@@ -9,17 +8,14 @@ using Kysect.GithubUtils.Models;
 namespace Kysect.GithubUtils.Tests;
 
 //to pass tests you should specify some information in appsettings.json
-[TestFixture]
-[Ignore("Only manual run")]
 public class RepositoryDiscoveryIntegrationTests
 {
-    private IRepositoryDiscoveryService _discoveryService = null!;
-    private string _productionToken = null!;
-    private string _organisationName = null!;
-    private IConfiguration _configuration = null!;
+    private readonly IRepositoryDiscoveryService _discoveryService = null!;
+    private readonly string _productionToken = null!;
+    private readonly string _organisationName = null!;
+    private readonly IConfiguration _configuration = null!;
 
-    [SetUp]
-    public void Setup()
+    public RepositoryDiscoveryIntegrationTests()
     {
         var builder = new ConfigurationBuilder()
             .AddJsonFile("appsettings.json", optional: false);
@@ -33,13 +29,13 @@ public class RepositoryDiscoveryIntegrationTests
         });
     }
 
-    [Test]
+    [Fact(Skip = "Require token")]
     public void ShouldCreateGitHubRepositoryDiscoveryService_Successful()
     {
         _discoveryService.Should().NotBeNull();
     }
 
-    [Test]
+    [Fact(Skip = "Require token")]
     public async Task ShouldBeAbleToGetOrganisationRepositories()
     {
         string expectedRepoName = _configuration.GetSection("ExpectedRepoName").Value.ThrowIfNull();
