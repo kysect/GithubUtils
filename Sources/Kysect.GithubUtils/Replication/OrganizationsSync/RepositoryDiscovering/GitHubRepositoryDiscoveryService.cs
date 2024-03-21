@@ -21,7 +21,7 @@ public sealed class GitHubRepositoryDiscoveryService : IRepositoryDiscoveryServi
         IReadOnlyList<Repository> repositories = await _gitHubClient.Repository.GetAllForOrg(organization, new ApiOptions { PageSize = PageSize });
 
         return repositories
-            .Select(r => new GithubRepositoryBranch(r.Owner.Name, r.Name, r.DefaultBranch))
+            .Select(r => new GithubRepositoryBranch(r.Owner.Login, r.Name, r.DefaultBranch))
             .ToList();
     }
 }
