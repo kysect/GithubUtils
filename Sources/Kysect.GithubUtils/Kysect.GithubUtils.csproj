@@ -7,7 +7,7 @@
 		<RepositoryUrl>https://github.com/kysect/GithubUtils</RepositoryUrl>
 		<Company>Kysect</Company>
 		<Authors>Kysect</Authors>
-		<Version>1.2.0</Version>
+		<Version>1.2.1</Version>
 		<LangVersion>latest</LangVersion>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 	</PropertyGroup>
