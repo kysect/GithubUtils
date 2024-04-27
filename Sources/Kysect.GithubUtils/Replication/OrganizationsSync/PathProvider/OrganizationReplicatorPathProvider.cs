@@ -33,8 +33,8 @@ public class OrganizationReplicatorPathFormatter : IOrganizationReplicatorPathFo
         return Path.Combine(_rootDirectory, PathFormatStrategyConstant.MainDirectory, repository.Owner, repository.Name);
     }
 
-    public string GetPathToRepositoryWithBranch(GithubRepositoryBranch repositoryBranch)
+    public string GetPathToRepositoryWithBranch(GithubRepository repository, string branch)
     {
-        return Path.Combine(_rootDirectory, PathFormatStrategyConstant.CustomBranchDirectory, repositoryBranch.Branch, repositoryBranch.Owner, repositoryBranch.Name);
+        return Path.Combine(_rootDirectory, PathFormatStrategyConstant.CustomBranchDirectory, branch, repository.Owner, repository.Name);
     }
 }

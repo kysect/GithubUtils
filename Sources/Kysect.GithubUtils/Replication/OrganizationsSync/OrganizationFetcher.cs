@@ -62,7 +62,7 @@ public class OrganizationFetcher
 
     private ClonedGithubRepository SyncRepository(GithubRepositoryBranch githubRepository, bool directoryPerBranch = false)
     {
-        string path = _repositoryFetcher.Checkout(_pathFormatter, githubRepository, directoryPerBranch);
+        string path = _repositoryFetcher.Checkout(_pathFormatter, githubRepository.GetRepository(), githubRepository.Branch, directoryPerBranch);
         return new ClonedGithubRepository(path, githubRepository.Owner, githubRepository.Name);
     }
 }

@@ -38,38 +38,38 @@ public class RepositoryFetcher : IRepositoryFetcher
         return targetPath;
     }
 
-    public string Checkout(ILocalStoragePathFactory pathFormatter, GithubRepositoryBranch repositoryWithBranch, bool directoryPerBranch = false)
+    public string Checkout(ILocalStoragePathFactory pathFormatter, GithubRepository repository, string branch, bool directoryPerBranch = false)
     {
         pathFormatter.ThrowIfNull();
+        _logger.LogDebug($"Checkout branch: {repository}, Branch: {branch}");
 
-        _logger.LogDebug($"Checkout branch: {repositoryWithBranch}");
         string targetPath = directoryPerBranch
-            ? pathFormatter.GetPathToRepositoryWithBranch(repositoryWithBranch)
-            : pathFormatter.GetPathToRepository(new GithubRepository(repositoryWithBranch.Owner, repositoryWithBranch.Name));
+            ? pathFormatter.GetPathToRepositoryWithBranch(repository, branch)
+            : pathFormatter.GetPathToRepository(repository);
 
-        CloneRepositoryIfNeed(targetPath, repositoryWithBranch.GetRepository());
+        CloneRepositoryIfNeed(targetPath, repository);
 
         using var repo = new Repository(targetPath);
-        Branch selectedBranch = repo.Branches[repositoryWithBranch.Branch];
+        Branch selectedBranch = repo.Branches[branch];
         if (selectedBranch is null)
         {
-            _logger.LogTrace($"Branch {repositoryWithBranch} was not found, try to use origin/{selectedBranch}");
+            _logger.LogTrace($"{repository}, Branch: {branch} was not found, try to use origin/{selectedBranch}");
             selectedBranch = repo.Branches[$"origin/{selectedBranch}"];
         }
 
         if (selectedBranch is null)
         {
-            var message = $"Specified branch was not found: {repositoryWithBranch}";
+            var message = $"Specified branch was not found ({repository}, Branch: {branch})";
             _logger.LogError(message);
             _logger.LogInformation("Available branches: " + string.Join(", ", repo.Branches.Select(b => b.FriendlyName)));
 
             if (!_fetchOptions.IgnoreMissedBranch)
             {
-                _logger.LogError($"Failed to checkout {repositoryWithBranch}. Branch was not found.");
+                _logger.LogError($"Failed to checkout {repository}, Branch: {branch}. Branch was not found.");
                 throw new ArgumentException(message);
             }
 
-            _logger.LogWarning($"Skip checkout to branch {repositoryWithBranch}. No such branch in repository.");
+            _logger.LogWarning($"Skip checkout to branch {repository}, Branch: {branch}. No such branch in repository.");
 
             return targetPath;
         }
@@ -91,12 +91,18 @@ public class RepositoryFetcher : IRepositoryFetcher
         CloneRepositoryIfNeed(masterClonePath, githubRepository);
         using var gitRepository = new Repository(masterClonePath);
 
-        IReadOnlyCollection<GithubRepositoryBranch> branches = EnumerateBranches(gitRepository, githubRepository);
+        IReadOnlyCollection<string> branches = gitRepository
+            .Branches
+            .Where(b => b.FriendlyName.StartsWith("origin/"))
+            .Select(b => b.FriendlyName)
+            .Select(b => b.Substring("remote/".Length))
+            .ToList();
+
         _logger.LogDebug($"Discovered {branches.Count} branches for {githubRepository}");
 
-        foreach (GithubRepositoryBranch branch in branches)
+        foreach (string branch in branches)
         {
-            Checkout(pathFormatter, branch, directoryPerBranch: true);
+            Checkout(pathFormatter, githubRepository, branch, directoryPerBranch: true);
         }
     }
 
@@ -111,16 +117,5 @@ public class RepositoryFetcher : IRepositoryFetcher
         string remoteUrl = githubRepository.ToGithubGitUrl();
         Repository.Clone(remoteUrl, targetPath, _fetchOptions.CloneOptions);
         return true;
-    }
-
-    private static IReadOnlyCollection<GithubRepositoryBranch> EnumerateBranches(IRepository gitRepository, GithubRepository githubRepository)
-    {
-        return gitRepository
-            .Branches
-            .Where(b => b.FriendlyName.StartsWith("origin/"))
-            .Select(b => b.FriendlyName)
-            .Select(b => b.Substring("remote/".Length))
-            .Select(b => new GithubRepositoryBranch(githubRepository, b))
-            .ToList();
     }
 }
