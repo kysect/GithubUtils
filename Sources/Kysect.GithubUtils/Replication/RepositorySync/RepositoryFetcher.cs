@@ -1,4 +1,5 @@
-﻿using Kysect.GithubUtils.Models;
+﻿using Kysect.CommonLib.BaseTypes.Extensions;
+using Kysect.GithubUtils.Models;
 using LibGit2Sharp;
 using Microsoft.Extensions.Logging;
 
@@ -15,26 +16,28 @@ public class RepositoryFetcher : IRepositoryFetcher
         _logger = logger;
     }
 
-    public bool CloneRepositoryIfNeed(string targetPath, GithubRepository githubRepository)
+    public bool CloneRepositoryIfNeed(string targetPath, IRemoteGitRepository remoteRepository)
     {
         if (IsRepositoryCloned(targetPath))
             return false;
 
-        return Clone(targetPath, githubRepository);
+        return Clone(targetPath, remoteRepository);
     }
 
-    public bool Clone(string targetPath, GithubRepository githubRepository)
+    public bool Clone(string targetPath, IRemoteGitRepository remoteRepository)
     {
-        _logger.LogDebug($"Create directory for cloning repo. Repository: {githubRepository}, folder: {targetPath}");
+        remoteRepository.ThrowIfNull();
+
+        _logger.LogDebug($"Create directory for cloning repo. Repository: {remoteRepository}, folder: {targetPath}");
         Directory.CreateDirectory(targetPath);
-        string remoteUrl = githubRepository.ToGithubGitUrl();
+        string remoteUrl = remoteRepository.GetGitHttpsUrl();
         Repository.Clone(remoteUrl, targetPath, _fetchOptions.CloneOptions);
         return true;
     }
 
-    public void FetchAllBranches(string targetPath, GithubRepository githubRepository)
+    public void FetchAllBranches(string targetPath, IRemoteGitRepository remoteRepository)
     {
-        _logger.LogDebug($"Try to fetch updates from remote repository. Repository: {githubRepository}, folder: {targetPath}");
+        _logger.LogDebug($"Try to fetch updates from remote repository. Repository: {remoteRepository}, folder: {targetPath}");
         using var repo = new Repository(targetPath);
 
         Remote remote = repo.Network.Remotes["origin"];
@@ -45,58 +48,58 @@ public class RepositoryFetcher : IRepositoryFetcher
         Commands.Fetch(repo, remote.Name, refSpecs, _fetchOptions.FetchOptions, string.Empty);
     }
 
-    public void CheckoutBranch(string targetPath, GithubRepository githubRepository, string branch)
+    public void CheckoutBranch(string targetPath, IRemoteGitRepository remoteRepository, string branch)
     {
         using var repo = new Repository(targetPath);
         Branch selectedBranch = repo.Branches[branch];
         if (selectedBranch is null)
         {
-            _logger.LogTrace($"{githubRepository}, Branch: {branch} was not found, try to use origin/{selectedBranch}");
+            _logger.LogTrace($"{remoteRepository}, Branch: {branch} was not found, try to use origin/{selectedBranch}");
             selectedBranch = repo.Branches[$"origin/{selectedBranch}"];
         }
 
         if (selectedBranch is null)
         {
-            var message = $"Specified branch was not found ({githubRepository}, Branch: {branch})";
+            var message = $"Specified branch was not found ({remoteRepository}, Branch: {branch})";
             _logger.LogError(message);
             _logger.LogInformation("Available branches: " + string.Join(", ", repo.Branches.Select(b => b.FriendlyName)));
 
             if (!_fetchOptions.IgnoreMissedBranch)
             {
-                _logger.LogError($"Failed to checkout {githubRepository}, Branch: {branch}. Branch was not found.");
+                _logger.LogError($"Failed to checkout {remoteRepository}, Branch: {branch}. Branch was not found.");
                 throw new ArgumentException(message);
             }
 
-            _logger.LogWarning($"Skip checkout to branch {githubRepository}, Branch: {branch}. No such branch in repository.");
+            _logger.LogWarning($"Skip checkout to branch {remoteRepository}, Branch: {branch}. No such branch in repository.");
             return;
         }
 
         Commands.Checkout(repo, selectedBranch, _fetchOptions.CheckoutOptions);
     }
 
-    public string EnsureRepositoryUpdated(string targetPath, GithubRepository githubRepository)
+    public string EnsureRepositoryUpdated(string targetPath, IRemoteGitRepository remoteRepository)
     {
-        if (CloneRepositoryIfNeed(targetPath, githubRepository))
+        if (CloneRepositoryIfNeed(targetPath, remoteRepository))
             return targetPath;
 
-        FetchAllBranches(targetPath, githubRepository);
+        FetchAllBranches(targetPath, remoteRepository);
         return targetPath;
     }
 
-    public string Checkout(string targetPath, GithubRepository repository, string branch)
+    public string Checkout(string targetPath, IRemoteGitRepository remoteRepository, string branch)
     {
-        _logger.LogDebug($"Checkout branch: {repository}, Branch: {branch}");
+        _logger.LogDebug($"Checkout branch: {remoteRepository}, Branch: {branch}");
 
-        CloneRepositoryIfNeed(targetPath, repository);
-        FetchAllBranches(targetPath, repository);
-        CheckoutBranch(targetPath, repository, branch);
+        CloneRepositoryIfNeed(targetPath, remoteRepository);
+        FetchAllBranches(targetPath, remoteRepository);
+        CheckoutBranch(targetPath, remoteRepository, branch);
         return targetPath;
     }
 
-    public IReadOnlyCollection<string> GetAllRemoteBranches(string targetPath, GithubRepository githubRepository)
+    public IReadOnlyCollection<string> GetAllRemoteBranches(string targetPath, IRemoteGitRepository remoteRepository)
     {
         using var gitRepository = new Repository(targetPath);
-        CloneRepositoryIfNeed(targetPath, githubRepository);
+        CloneRepositoryIfNeed(targetPath, remoteRepository);
 
         // TODO: looks like a bug, need to check
         IReadOnlyCollection<string> branches = gitRepository
@@ -106,7 +109,7 @@ public class RepositoryFetcher : IRepositoryFetcher
             .Select(b => b.Substring("remote/".Length))
             .ToList();
 
-        _logger.LogDebug($"Discovered {branches.Count} branches for {githubRepository}");
+        _logger.LogDebug($"Discovered {branches.Count} branches for {remoteRepository}");
         return branches;
     }
 

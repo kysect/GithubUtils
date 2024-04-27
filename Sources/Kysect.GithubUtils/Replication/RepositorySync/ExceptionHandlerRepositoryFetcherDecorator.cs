@@ -15,99 +15,99 @@ public class ExceptionHandlerRepositoryFetcherDecorator : IRepositoryFetcher
         _fetcher = fetcher.ThrowIfNull();
     }
 
-    public bool CloneRepositoryIfNeed(string targetPath, GithubRepository githubRepository)
+    public bool CloneRepositoryIfNeed(string targetPath, IRemoteGitRepository remoteRepository)
     {
         try
         {
-            return _fetcher.CloneRepositoryIfNeed(targetPath, githubRepository);
+            return _fetcher.CloneRepositoryIfNeed(targetPath, remoteRepository);
         }
         catch (Exception e)
         {
-            string message = $"Exception while updating {githubRepository}.";
+            string message = $"Exception while updating {remoteRepository}.";
             _logger.LogError($"{message} Error: {e.Message}");
             throw new GithubUtilsException(message, e);
         }
     }
 
-    public bool Clone(string targetPath, GithubRepository githubRepository)
+    public bool Clone(string targetPath, IRemoteGitRepository remoteRepository)
     {
         try
         {
-            return _fetcher.Clone(targetPath, githubRepository);
+            return _fetcher.Clone(targetPath, remoteRepository);
         }
         catch (Exception e)
         {
-            string message = $"Exception while updating {githubRepository}.";
+            string message = $"Exception while updating {remoteRepository}.";
             _logger.LogError($"{message} Error: {e.Message}");
             throw new GithubUtilsException(message, e);
         }
     }
 
-    public void FetchAllBranches(string targetPath, GithubRepository githubRepository)
+    public void FetchAllBranches(string targetPath, IRemoteGitRepository remoteRepository)
     {
         try
         {
-            _fetcher.FetchAllBranches(targetPath, githubRepository);
+            _fetcher.FetchAllBranches(targetPath, remoteRepository);
         }
         catch (Exception e)
         {
-            string message = $"Exception while updating {githubRepository}.";
+            string message = $"Exception while updating {remoteRepository}.";
             _logger.LogError($"{message} Error: {e.Message}");
             throw new GithubUtilsException(message, e);
         }
     }
 
-    public void CheckoutBranch(string targetPath, GithubRepository githubRepository, string branch)
+    public void CheckoutBranch(string targetPath, IRemoteGitRepository remoteRepository, string branch)
     {
         try
         {
-            _fetcher.CheckoutBranch(targetPath, githubRepository, branch);
+            _fetcher.CheckoutBranch(targetPath, remoteRepository, branch);
         }
         catch (Exception e)
         {
-            string message = $"Exception while updating {githubRepository}.";
+            string message = $"Exception while updating {remoteRepository}.";
             _logger.LogError($"{message} Error: {e.Message}");
             throw new GithubUtilsException(message, e);
         }
     }
 
-    public string EnsureRepositoryUpdated(string targetPath, GithubRepository githubRepository)
+    public string EnsureRepositoryUpdated(string targetPath, IRemoteGitRepository remoteRepository)
     {
         try
         {
-            return _fetcher.EnsureRepositoryUpdated(targetPath, githubRepository);
+            return _fetcher.EnsureRepositoryUpdated(targetPath, remoteRepository);
         }
         catch (Exception e)
         {
-            string message = $"Exception while updating {githubRepository}.";
+            string message = $"Exception while updating {remoteRepository}.";
             _logger.LogError($"{message} Error: {e.Message}");
             throw new GithubUtilsException(message, e);
         }
     }
 
-    public string Checkout(string targetPath, GithubRepository repository, string branch)
+    public string Checkout(string targetPath, IRemoteGitRepository remoteRepository, string branch)
     {
         try
         {
-            return _fetcher.Checkout(targetPath, repository, branch);
+            return _fetcher.Checkout(targetPath, remoteRepository, branch);
         }
         catch (Exception e)
         {
-            string message = $"Exception while updating {repository}, Branch: {branch}.";
+            string message = $"Exception while updating {remoteRepository}, Branch: {branch}.";
             _logger.LogError($"{message} Error: {e.Message}");
             throw new GithubUtilsException(message, e);
         }
     }
 
-    public IReadOnlyCollection<string> GetAllRemoteBranches(string targetPath, GithubRepository githubRepository)
+    public IReadOnlyCollection<string> GetAllRemoteBranches(string targetPath, IRemoteGitRepository remoteRepository)
     {
         try
         {
-            return _fetcher.GetAllRemoteBranches(targetPath, githubRepository);
+            return _fetcher.GetAllRemoteBranches(targetPath, remoteRepository);
         }
         catch (Exception e)
         {
-            string message = $"Exception while updating {githubRepository}.";
+            string message = $"Exception while updating {remoteRepository}.";
             _logger.LogError($"{message} Error: {e.Message}");
             throw new GithubUtilsException(message, e);
         }
