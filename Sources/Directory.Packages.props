@@ -5,13 +5,13 @@
   <ItemGroup>
     <PackageVersion Include="FluentAssertions" Version="6.12.0" />
     <PackageVersion Include="IsExternalInit" Version="1.0.3" />
-    <PackageVersion Include="Kysect.CommonLib" Version="0.1.20" />
-    <PackageVersion Include="Kysect.CommonLib.Testing" Version="0.1.20" />
+    <PackageVersion Include="Kysect.CommonLib" Version="0.1.21" />
+    <PackageVersion Include="Kysect.CommonLib.Testing" Version="0.1.21" />
     <PackageVersion Include="Kysect.EditorConfig" Version="1.1.8" />
     <PackageVersion Include="LibGit2Sharp" Version="0.30.0" />
     <PackageVersion Include="Octokit" Version="11.0.1" />
     <PackageVersion Include="System.Text.Json" Version="8.0.0" />
-    <PackageVersion Include="Kysect.CommonLib.DependencyInjection" Version="0.1.20" />
+    <PackageVersion Include="Kysect.CommonLib.DependencyInjection" Version="0.1.21" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
     <PackageVersion Include="NUnit" Version="4.0.1" />
     <PackageVersion Include="NUnit3TestAdapter" Version="4.5.0" />
