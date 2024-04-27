@@ -116,9 +116,6 @@ public class RepositoryFetcher : IRepositoryFetcher
     private bool IsRepositoryCloned(string targetPath)
     {
         // TODO: handle case when directory exists but is not initialized
-        if (Directory.Exists(targetPath))
-            return false;
-
-        return true;
+        return Directory.Exists(targetPath);
     }
 }
