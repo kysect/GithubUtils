@@ -1,8 +1,8 @@
 ﻿namespace Kysect.GithubUtils.Models;
 
-public readonly record struct GithubRepository(string Owner, string Name)
+public readonly record struct GithubRepository(string Owner, string Name) : IRemoteGitRepository
 {
-    public string ToGithubGitUrl()
+    public string GetGitHttpsUrl()
     {
         return $"https://github.com/{Owner}/{Name}.git";
     }
