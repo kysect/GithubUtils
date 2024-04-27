@@ -1,4 +1,4 @@
-﻿using Kysect.GithubUtils.Replication.RepositorySync.LocalStoragePathFactories;
+﻿using Kysect.GithubUtils.Replication.OrganizationsSync.LocalStoragePathFactories;
 
 namespace Kysect.GithubUtils.Replication.OrganizationsSync.PathProvider;
 

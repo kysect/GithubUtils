@@ -3,9 +3,9 @@ using Kysect.GithubUtils.Contributions.ActivityProviders;
 using Kysect.GithubUtils.Contributions.ApiResponses;
 using Kysect.GithubUtils.Models;
 using Kysect.GithubUtils.Replication.OrganizationsSync;
+using Kysect.GithubUtils.Replication.OrganizationsSync.LocalStoragePathFactories;
 using Kysect.GithubUtils.Replication.OrganizationsSync.PathProvider;
 using Kysect.GithubUtils.Replication.RepositorySync;
-using Kysect.GithubUtils.Replication.RepositorySync.LocalStoragePathFactories;
 using Microsoft.Extensions.Logging;
 using Octokit;
 using System.Text.Json;
@@ -29,8 +29,9 @@ public class DemoScenarios
         var githubRepository = new GithubRepository("kysect", "GithubUtils");
         ILocalStoragePathFactory localStoragePathFactory = new UseOwnerAndRepoForFolderNameStrategy("repo");
 
-        repositoryFetcher.EnsureRepositoryUpdated(localStoragePathFactory, githubRepository);
-        repositoryFetcher.Checkout(localStoragePathFactory, githubRepository, "master");
+        string targetPath = localStoragePathFactory.GetPathToRepository(githubRepository);
+        repositoryFetcher.EnsureRepositoryUpdated(targetPath, githubRepository);
+        repositoryFetcher.Checkout(targetPath, githubRepository, "master");
     }
 
     public void CheckStatParser()

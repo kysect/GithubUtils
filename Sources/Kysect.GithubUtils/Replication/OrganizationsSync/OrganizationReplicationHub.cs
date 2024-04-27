@@ -11,10 +11,10 @@ namespace Kysect.GithubUtils.Replication.OrganizationsSync;
 public class OrganizationReplicationHub
 {
     private readonly IOrganizationReplicatorPathFormatter _pathFormatter;
-    private readonly RepositoryFetcher _repositoryFetcher;
+    private readonly IRepositoryFetcher _repositoryFetcher;
     private readonly ILogger _logger;
 
-    public OrganizationReplicationHub(IOrganizationReplicatorPathFormatter pathFormatter, RepositoryFetcher repositoryFetcher, ILogger logger)
+    public OrganizationReplicationHub(IOrganizationReplicatorPathFormatter pathFormatter, IRepositoryFetcher repositoryFetcher, ILogger logger)
     {
         _pathFormatter = pathFormatter;
         _repositoryFetcher = repositoryFetcher;
@@ -116,6 +116,6 @@ public class OrganizationReplicationHub
 
     public OrganizationReplicator GetOrganizationReplicator(string repository)
     {
-        return new OrganizationReplicator(_pathFormatter, repository, _repositoryFetcher);
+        return new OrganizationReplicator(_pathFormatter, repository, _repositoryFetcher, _logger);
     }
 }

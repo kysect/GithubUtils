@@ -1,6 +1,6 @@
 ﻿using Kysect.GithubUtils.Models;
 
-namespace Kysect.GithubUtils.Replication.RepositorySync.LocalStoragePathFactories;
+namespace Kysect.GithubUtils.Replication.OrganizationsSync.LocalStoragePathFactories;
 
 public class UseRepoForFolderNameStrategy : ILocalStoragePathFactory
 {
