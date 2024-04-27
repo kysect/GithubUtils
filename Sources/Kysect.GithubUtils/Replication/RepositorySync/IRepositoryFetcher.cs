@@ -1,11 +1,14 @@
 ﻿using Kysect.GithubUtils.Models;
-using Kysect.GithubUtils.Replication.RepositorySync.LocalStoragePathFactories;
 
 namespace Kysect.GithubUtils.Replication.RepositorySync;
 
 public interface IRepositoryFetcher
 {
-    string EnsureRepositoryUpdated(ILocalStoragePathFactory pathFormatter, GithubRepository githubRepository);
-    string Checkout(ILocalStoragePathFactory pathFormatter, GithubRepository repository, string branch, bool directoryPerBranch = false);
-    void CloneAllBranches(ILocalStoragePathFactory pathFormatter, GithubRepository githubRepository);
+    bool CloneRepositoryIfNeed(string targetPath, GithubRepository githubRepository);
+    bool Clone(string targetPath, GithubRepository githubRepository);
+    void FetchAllBranches(string targetPath, GithubRepository githubRepository);
+    void CheckoutBranch(string targetPath, GithubRepository githubRepository, string branch);
+    string EnsureRepositoryUpdated(string targetPath, GithubRepository githubRepository);
+    string Checkout(string targetPath, GithubRepository repository, string branch);
+    IReadOnlyCollection<string> GetAllRemoteBranches(string targetPath, GithubRepository githubRepository);
 }

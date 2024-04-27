@@ -1,6 +1,5 @@
 ﻿using Kysect.CommonLib.BaseTypes.Extensions;
 using Kysect.GithubUtils.Models;
-using Kysect.GithubUtils.Replication.RepositorySync.LocalStoragePathFactories;
 using Microsoft.Extensions.Logging;
 
 namespace Kysect.GithubUtils.Replication.RepositorySync;
@@ -16,11 +15,11 @@ public class ExceptionHandlerRepositoryFetcherDecorator : IRepositoryFetcher
         _fetcher = fetcher.ThrowIfNull();
     }
 
-    public string EnsureRepositoryUpdated(ILocalStoragePathFactory pathFormatter, GithubRepository githubRepository)
+    public bool CloneRepositoryIfNeed(string targetPath, GithubRepository githubRepository)
     {
         try
         {
-            return _fetcher.EnsureRepositoryUpdated(pathFormatter, githubRepository);
+            return _fetcher.CloneRepositoryIfNeed(targetPath, githubRepository);
         }
         catch (Exception e)
         {
@@ -30,11 +29,67 @@ public class ExceptionHandlerRepositoryFetcherDecorator : IRepositoryFetcher
         }
     }
 
-    public string Checkout(ILocalStoragePathFactory pathFormatter, GithubRepository repository, string branch, bool directoryPerBranch = false)
+    public bool Clone(string targetPath, GithubRepository githubRepository)
     {
         try
         {
-            return _fetcher.Checkout(pathFormatter, repository, branch, directoryPerBranch);
+            return _fetcher.Clone(targetPath, githubRepository);
+        }
+        catch (Exception e)
+        {
+            string message = $"Exception while updating {githubRepository}.";
+            _logger.LogError($"{message} Error: {e.Message}");
+            throw new GithubUtilsException(message, e);
+        }
+    }
+
+    public void FetchAllBranches(string targetPath, GithubRepository githubRepository)
+    {
+        try
+        {
+            _fetcher.FetchAllBranches(targetPath, githubRepository);
+        }
+        catch (Exception e)
+        {
+            string message = $"Exception while updating {githubRepository}.";
+            _logger.LogError($"{message} Error: {e.Message}");
+            throw new GithubUtilsException(message, e);
+        }
+    }
+
+    public void CheckoutBranch(string targetPath, GithubRepository githubRepository, string branch)
+    {
+        try
+        {
+            _fetcher.CheckoutBranch(targetPath, githubRepository, branch);
+        }
+        catch (Exception e)
+        {
+            string message = $"Exception while updating {githubRepository}.";
+            _logger.LogError($"{message} Error: {e.Message}");
+            throw new GithubUtilsException(message, e);
+        }
+    }
+
+    public string EnsureRepositoryUpdated(string targetPath, GithubRepository githubRepository)
+    {
+        try
+        {
+            return _fetcher.EnsureRepositoryUpdated(targetPath, githubRepository);
+        }
+        catch (Exception e)
+        {
+            string message = $"Exception while updating {githubRepository}.";
+            _logger.LogError($"{message} Error: {e.Message}");
+            throw new GithubUtilsException(message, e);
+        }
+    }
+
+    public string Checkout(string targetPath, GithubRepository repository, string branch)
+    {
+        try
+        {
+            return _fetcher.Checkout(targetPath, repository, branch);
         }
         catch (Exception e)
         {
@@ -44,11 +99,11 @@ public class ExceptionHandlerRepositoryFetcherDecorator : IRepositoryFetcher
         }
     }
 
-    public void CloneAllBranches(ILocalStoragePathFactory pathFormatter, GithubRepository githubRepository)
+    public IReadOnlyCollection<string> GetAllRemoteBranches(string targetPath, GithubRepository githubRepository)
     {
         try
         {
-            _fetcher.CloneAllBranches(pathFormatter, githubRepository);
+            return _fetcher.GetAllRemoteBranches(targetPath, githubRepository);
         }
         catch (Exception e)
         {

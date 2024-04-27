@@ -1,7 +1,7 @@
 ﻿using Kysect.GithubUtils.Models;
+using Kysect.GithubUtils.Replication.OrganizationsSync.LocalStoragePathFactories;
 using Kysect.GithubUtils.Replication.OrganizationsSync.RepositoryDiscovering;
 using Kysect.GithubUtils.Replication.RepositorySync;
-using Kysect.GithubUtils.Replication.RepositorySync.LocalStoragePathFactories;
 using Microsoft.Extensions.Logging;
 
 namespace Kysect.GithubUtils.Replication.OrganizationsSync;
@@ -10,12 +10,12 @@ public class OrganizationFetcher
 {
     private readonly bool _useParallelProcessing;
 
-    private readonly RepositoryFetcher _repositoryFetcher;
+    private readonly IRepositoryFetcher _repositoryFetcher;
     private readonly ILocalStoragePathFactory _pathFormatter;
     private readonly IRepositoryDiscoveryService _discoveryService;
     private readonly ILogger _logger;
 
-    public OrganizationFetcher(IRepositoryDiscoveryService discoveryService, RepositoryFetcher repositoryFetcher, ILocalStoragePathFactory pathFormatter, ILogger logger, bool useParallelProcessing = true)
+    public OrganizationFetcher(IRepositoryDiscoveryService discoveryService, IRepositoryFetcher repositoryFetcher, ILocalStoragePathFactory pathFormatter, ILogger logger, bool useParallelProcessing = true)
     {
         _discoveryService = discoveryService;
         _repositoryFetcher = repositoryFetcher;
@@ -60,9 +60,10 @@ public class OrganizationFetcher
         }
     }
 
-    private ClonedGithubRepository SyncRepository(GithubRepositoryBranch githubRepository, bool directoryPerBranch = false)
+    private ClonedGithubRepository SyncRepository(GithubRepositoryBranch githubRepository)
     {
-        string path = _repositoryFetcher.Checkout(_pathFormatter, githubRepository.GetRepository(), githubRepository.Branch, directoryPerBranch);
+        string targetPath = _pathFormatter.GetPathToRepository(githubRepository.GetRepository());
+        string path = _repositoryFetcher.Checkout(targetPath, githubRepository.GetRepository(), githubRepository.Branch);
         return new ClonedGithubRepository(path, githubRepository.Owner, githubRepository.Name);
     }
 }
