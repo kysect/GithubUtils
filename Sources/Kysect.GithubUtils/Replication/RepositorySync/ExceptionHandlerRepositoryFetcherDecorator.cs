@@ -30,15 +30,15 @@ public class ExceptionHandlerRepositoryFetcherDecorator : IRepositoryFetcher
         }
     }
 
-    public string Checkout(ILocalStoragePathFactory pathFormatter, GithubRepositoryBranch repositoryWithBranch, bool directoryPerBranch = false)
+    public string Checkout(ILocalStoragePathFactory pathFormatter, GithubRepository repository, string branch, bool directoryPerBranch = false)
     {
         try
         {
-            return _fetcher.Checkout(pathFormatter, repositoryWithBranch, directoryPerBranch);
+            return _fetcher.Checkout(pathFormatter, repository, branch, directoryPerBranch);
         }
         catch (Exception e)
         {
-            string message = $"Exception while updating {repositoryWithBranch}.";
+            string message = $"Exception while updating {repository}, Branch: {branch}.";
             _logger.LogError($"{message} Error: {e.Message}");
             throw new GithubUtilsException(message, e);
         }

@@ -5,5 +5,5 @@ namespace Kysect.GithubUtils.Replication.RepositorySync.LocalStoragePathFactorie
 public interface ILocalStoragePathFactory
 {
     string GetPathToRepository(GithubRepository repository);
-    string GetPathToRepositoryWithBranch(GithubRepositoryBranch repositoryBranch);
+    string GetPathToRepositoryWithBranch(GithubRepository repository, string branch);
 }

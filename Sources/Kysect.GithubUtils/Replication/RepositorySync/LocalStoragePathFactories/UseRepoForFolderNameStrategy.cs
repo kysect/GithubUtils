@@ -16,8 +16,8 @@ public class UseRepoForFolderNameStrategy : ILocalStoragePathFactory
         return Path.Combine(_rootPath, PathFormatStrategyConstant.MainDirectory, repository.Name);
     }
 
-    public string GetPathToRepositoryWithBranch(GithubRepositoryBranch repositoryBranch)
+    public string GetPathToRepositoryWithBranch(GithubRepository repository, string branch)
     {
-        return Path.Combine(_rootPath, PathFormatStrategyConstant.CustomBranchDirectory, repositoryBranch.Branch, repositoryBranch.Name);
+        return Path.Combine(_rootPath, PathFormatStrategyConstant.CustomBranchDirectory, branch, repository.Name);
     }
 }

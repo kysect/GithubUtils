@@ -30,7 +30,7 @@ public class DemoScenarios
         ILocalStoragePathFactory localStoragePathFactory = new UseOwnerAndRepoForFolderNameStrategy("repo");
 
         repositoryFetcher.EnsureRepositoryUpdated(localStoragePathFactory, githubRepository);
-        repositoryFetcher.Checkout(localStoragePathFactory, new GithubRepositoryBranch(githubRepository, "master"));
+        repositoryFetcher.Checkout(localStoragePathFactory, githubRepository, "master");
     }
 
     public void CheckStatParser()
