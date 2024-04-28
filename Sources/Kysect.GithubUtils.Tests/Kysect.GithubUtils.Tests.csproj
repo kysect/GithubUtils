@@ -1,9 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
-    <Nullable>enable</Nullable>
-
     <IsPackable>false</IsPackable>
     <NoWarn>$(NoWarn);CS1591;CA1707</NoWarn>
   </PropertyGroup>
@@ -30,5 +27,4 @@
   <ItemGroup>
     <ProjectReference Include="..\Kysect.GithubUtils\Kysect.GithubUtils.csproj" />
   </ItemGroup>
-
 </Project>

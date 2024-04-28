@@ -16,7 +16,7 @@ public class RepositoryFetcherTests : IDisposable
     {
         _fileSystem = new FileSystem();
         _temporaryDirectory = new TestTemporaryDirectory(_fileSystem);
-        _repositoryFetcher = new RepositoryFetcher(new RepositoryFetchOptions("test-user", "token"), TestLoggerProvider.Provide());
+        _repositoryFetcher = new RepositoryFetcher(RepositoryFetchOptions.CreateWithUserPasswordAuth("test-user", "token"), TestLoggerProvider.Provide());
     }
 
     [Fact]

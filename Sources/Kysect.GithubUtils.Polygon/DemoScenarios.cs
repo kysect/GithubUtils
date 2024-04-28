@@ -25,7 +25,7 @@ public class DemoScenarios
     {
         var gitUser = string.Empty;
         var token = string.Empty;
-        var repositoryFetcher = new RepositoryFetcher(new RepositoryFetchOptions(gitUser, token), _logger);
+        var repositoryFetcher = new RepositoryFetcher(RepositoryFetchOptions.CreateWithUserPasswordAuth(gitUser, token), _logger);
         var githubRepository = new GithubRepository("kysect", "GithubUtils");
         ILocalStoragePathFactory localStoragePathFactory = new UseOwnerAndRepoForFolderNameStrategy("repo");
 
@@ -45,7 +45,7 @@ public class DemoScenarios
     {
         var gitUser = "fredikats";
         var token = string.Empty;
-        var repositoryFetcher = new RepositoryFetcher(new RepositoryFetchOptions(gitUser, token), _logger);
+        var repositoryFetcher = new RepositoryFetcher(RepositoryFetchOptions.CreateWithUserPasswordAuth(gitUser, token), _logger);
         var organizationReplicatorPathProvider = new OrganizationReplicatorPathFormatter("test-repos");
         var organizationReplicationHub = new OrganizationReplicationHub(organizationReplicatorPathProvider, repositoryFetcher, _logger);
         organizationReplicationHub.TryAddOrganization("fredikats");
