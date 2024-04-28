@@ -1,5 +1,5 @@
 ﻿using LibGit2Sharp;
-using LibGit2Sharp.Handlers;
+using System.Text;
 
 namespace Kysect.GithubUtils.Replication.RepositorySync;
 
@@ -10,44 +10,56 @@ public class RepositoryFetchOptions
     public FetchOptions FetchOptions { get; init; }
     public CloneOptions CloneOptions { get; init; }
 
-    public RepositoryFetchOptions(string gitUser, string token, bool ignoreMissedBranch = false)
+    public RepositoryFetchOptions(bool ignoreMissedBranch, CheckoutOptions checkoutOptions, FetchOptions fetchOptions, CloneOptions cloneOptions)
     {
         IgnoreMissedBranch = ignoreMissedBranch;
-        CheckoutOptions = CreateDefaultCheckoutOptions();
-        FetchOptions = CreateDefaultFetchOptions(gitUser, token);
-        CloneOptions = CreateDefaultCloneOptions(gitUser, token);
+        CheckoutOptions = checkoutOptions;
+        FetchOptions = fetchOptions;
+        CloneOptions = cloneOptions;
     }
 
-    public static CheckoutOptions CreateDefaultCheckoutOptions()
+    public static RepositoryFetchOptions CreateWithUserPasswordAuth(string gitUser, string token, bool ignoreMissedBranch = false)
     {
-        return new CheckoutOptions();
-    }
-
-    public static FetchOptions CreateDefaultFetchOptions(string gitUser, string token)
-    {
-        return new FetchOptions { CredentialsProvider = CreateHandlerForToken(gitUser, token) };
-    }
-
-    public static CloneOptions CreateDefaultCloneOptions(string gitUser, string token)
-    {
-        var defaultCloneOptions = new CloneOptions
-        {
-            FetchOptions =
-            {
-                CredentialsProvider = CreateHandlerForToken(gitUser, token)
-            }
-        };
-
-        return defaultCloneOptions;
-    }
-
-    private static CredentialsHandler CreateHandlerForToken(string gitUser, string token)
-    {
-        return CreateCredentialsProvider;
-
         UsernamePasswordCredentials CreateCredentialsProvider(string url, string usernameFromUrl, SupportedCredentialTypes types)
         {
             return new UsernamePasswordCredentials { Username = gitUser, Password = token };
         }
+
+        return new RepositoryFetchOptions(
+            ignoreMissedBranch,
+            new CheckoutOptions(),
+            new FetchOptions { CredentialsProvider = CreateCredentialsProvider },
+            new CloneOptions
+            {
+                FetchOptions =
+                {
+                    CredentialsProvider = CreateCredentialsProvider
+                }
+            }
+        );
+    }
+
+    public static RepositoryFetchOptions CreateHeaderBasedAuth(string token, bool ignoreMissedBranch = false)
+    {
+        byte[] byteArray = Encoding.ASCII.GetBytes(":" + token);
+        string encodedToken = Convert.ToBase64String(byteArray);
+
+        string[] customHeaders = new[]
+        {
+            $"Authorization: Basic {encodedToken}"
+        };
+
+        return new RepositoryFetchOptions(
+            ignoreMissedBranch,
+            new CheckoutOptions(),
+            new FetchOptions { CustomHeaders = customHeaders },
+            new CloneOptions
+            {
+                FetchOptions =
+                {
+                    CustomHeaders = customHeaders
+                }
+            }
+        );
     }
 }
