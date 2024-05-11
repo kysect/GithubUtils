@@ -9,10 +9,6 @@
     <PackageReference Include="FluentAssertions" />
     <PackageReference Include="Kysect.CommonLib.Testing" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
-    <PackageReference Include="coverlet.collector">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
     <PackageReference Include="System.Linq.Async" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" />
