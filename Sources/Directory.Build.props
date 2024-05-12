@@ -1,20 +1,19 @@
 <Project>
   <PropertyGroup>
-    <Authors>Kysect</Authors>
-    <Company>Kysect</Company>
-    <LangVersion>latest</LangVersion>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
     <UseArtifactsOutput>true</UseArtifactsOutput>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <DebugType>portable</DebugType>
-    <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-    <RepositoryUrl>https://github.com/kysect/GithubUtils</RepositoryUrl>
-    <LangVersion>latest</LangVersion>
+    <RepositoryUrl>https://github.com/Kysect/GithubUtils</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/Kysect/GithubUtils</PackageProjectUrl>
   </PropertyGroup>
+
   <ItemGroup>
-    <PackageReference Include="Kysect.Editorconfig" />
+    <None Include="$(MSBuildThisFileDirectory)../README.md" Pack="true" PackagePath="/Readme.md" Visible="false" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Kysect.SolutionDefaults">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
     <PackageReference Include="MinVer">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
