@@ -7,7 +7,7 @@
     <PackageVersion Include="IsExternalInit" Version="1.0.3" />
     <PackageVersion Include="Kysect.CommonLib" Version="0.1.21" />
     <PackageVersion Include="Kysect.CommonLib.Testing" Version="0.1.21" />
-    <PackageVersion Include="Kysect.EditorConfig" Version="1.1.8" />
+    <PackageVersion Include="Kysect.SolutionDefaults" Version="0.1.2" />
     <PackageVersion Include="LibGit2Sharp" Version="0.30.0" />
     <PackageVersion Include="Octokit" Version="11.0.1" />
     <PackageVersion Include="System.Text.Json" Version="8.0.0" />
